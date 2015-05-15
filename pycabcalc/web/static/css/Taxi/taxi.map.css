@@ -1,0 +1,46 @@
+
+
+.map_container {
+  
+  /*position in the  middle of the screen*/
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 95%;
+
+  position:relative; 
+  border: 4px solid #f7b731;
+  display:block; 
+}
+
+pre.map_trend {
+  position:absolute;
+  top:10px;
+  left:10px;
+  padding:5px 10px;
+  background:rgba(0,0,0,0.5);
+  color:#fff;
+  font-size:40px;
+  line-height:48px;
+  border-radius:5px;
+  border: 2px solid #f7b731;
+}
+
+.map_info {
+  position:absolute;
+  top:30%;
+  left:30%;
+  max-width: 40%;
+  padding:5px 5px;
+  background:rgba(0,0,0,0.5);
+  color:#fff;
+  font-size:20px;
+  line-height:25px;
+  border-radius:5px;
+
+  /*Text wrap*/
+  white-space: pre-wrap;       /* CSS 3 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}

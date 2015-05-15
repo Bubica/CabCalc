@@ -1,0 +1,50 @@
+#pinwrapper {
+	width: 100%;
+	max-width: 1000px;
+	min-width: 1000px;
+	min-height: 520px;
+	max-height: 520px;
+	margin: 15px;
+	padding: 10px;
+	background: rgba(255, 255, 255, 0.6);
+	border: 3px solid #f7b731;
+
+}
+
+#pincontainer {
+	background:no-repeat center center;
+	width: 98%;
+	margin-bottom: 6px;
+	padding: 5px;
+	background: rgba(255, 255, 255, 0.6);
+	border: 3px solid #f7b731;
+
+}
+
+ 
+.pincolumns {
+	line-height: 0;
+	-moz-column-count: 3;
+	-moz-column-gap: 10px;
+	-moz-column-fill: auto;
+	-webkit-column-count: 3;
+	-webkit-column-gap: 10px;
+	-webkit-column-fill: auto;
+	column-count: 3;
+	column-gap: 10px;
+	column-fill: auto;
+}
+ 
+
+
+/*@media all and (min-width: 960px) {
+	#pincolumns {
+		column-count: 4;
+	}
+}
+ 
+@media all and (min-width: 1170px) {
+	#pincolumns {
+		column-count: 5;
+	}
+}*/

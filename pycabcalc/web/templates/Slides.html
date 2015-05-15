@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>CabCalc</title>
+
+		<meta name="description" content="Cab calc slides">
+
+		<!-- <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' /> -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		  <!-- mapbox -->
+		  <script src='https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.js'></script>
+		  <link href="https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.css" rel="stylesheet"> <!-- tiles -->
+		  <link href="../static/css/Mapbox/mapbox_base.css" rel="stylesheet"> 
+		  <link href="https://www.mapbox.com/mapbox.js/assets/css/site.css" rel="stylesheet">
+
+
+		<!-- Slides styling -->
+		<link rel="stylesheet" href="../static/css/Slides/reveal.min.css">
+		<link rel="stylesheet" href="../static/css/Slides/theme/default.css" id="theme">
+		<link rel="stylesheet" href="../static/css/Slides/pin.css">
+
+		<!-- Slides animation -->
+		<script src="../static/js/Slides/head.min.js"></script>
+		<script src="../static/js/Slides/reveal.min.js"></script>
+
+		<!-- generic look -->
+	  	<link rel="stylesheet" type="text/css" href="../static/css/Taxi/normalize3.css">
+	  	<link rel="stylesheet" type="text/css" href="../static/css/Taxi/webflow3.css">
+	  	<link rel="stylesheet" type="text/css" href="../static/css/Taxi/taxi.webflow3.css">
+	  	<script type="text/javascript" src="../static/js/Taxi/modernizr.js"></script>
+	  	<script type="text/javascript" src="../static/js/Taxi/jquery.min.js"></script>
+	  	<script type="text/javascript" src="../static/js/Taxi/webflow.js"></script>
+  		
+  		<script type="text/javascript" src="../static/js/Taxi/jquery.min.js"></script>
+  
+	</head>
+
+	<body class="bg">
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<div><h1>CabCalc</h1></div>
+					<p>
+						<small>Agata Brajdic</small>
+					</p>
+					<!-- Hi I am Agata and as this image here suggests I will talk to you something about NYC taxis. -->
+				</section>
+
+				<section>
+					<h2>The goal</h2>
+					<p>
+						Given a starting and ending location, <br />
+						predict how long will a taxi ride take and how much will it cost.
+					</p>
+					<!-- I have built an app which predicts the duration and the cost of a taxi ride in NYC.
+					The input to the app are a starting and ending location, and then the app computes how long would the ride likely take and what would be its expected cost. 
+					
+					Figuring out the trip duration may sound like a familiar task, something you have encountered for instance when using Google Maps.
+					But bear with me, I hope in this talk I will shade a little bit of new light to this problem.
+					-->
+				</section>
+
+				<section>
+					<section>
+						<h2>The problem</h2>
+						<p>
+							Without a real-time traffic data, can we make a reliable prediction using the data from the past?
+						</p>
+						<p>
+							(173 million 2013 NYC taxi rides made publicly available recently)
+						</p>
+						<a target="_blank" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/data_anim'">Peek into data >></a>
+					<!-- 
+					So, the challenge here was to compute the prediction without relying on any kind of real-time data,
+					but only using previously recorded historical data.
+
+					Recently, a dataset containing 173 million 2013 NYC taxi rides was made available.
+					Strong spatial an temporal trends taht I wanted to leverage in my app.
+
+					Let me guide you through an example how this might work.
+					-->
+					</section>
+					<section>
+						<h2>Example:</h2>
+						<p>Let's take a cab from Union Sq to Times Sq...</p>
+						<img width="800" height="520" src="../static/images/Slides/slides_p0.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+					<section>
+						<p>Sample the whole dataset</p>
+						<img width="800" height="520" src="../static/images/Slides/slides_p1.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+					<section>
+						<p>Sample the whole dataset</p>
+						<img width="800" height="520" src="../static/images/Slides/slides_p2.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+					<section>
+						<p>How Cabcalc does it:</p>
+						<img width="800" height="520" src="../static/images/Slides/slides_p3.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+					<section>
+						<p>How Cabcalc does it:</p>
+						<img width="800" height="520" src="../static/images/Slides/slides_p4.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+					<section>
+						<!-- <h2>Example:</h2> -->
+						<img width="800" height="520" src="../static/images/Slides/slides_p5.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+<!-- 					<section>
+						<h2>The challenge</h2>
+						<p>
+							Searching 173 million NYC taxi rides is not feasible in real-time and gives poor prediction.
+						</p>
+						<h2>The solution</h2>
+						<p>
+							By employing spatial locality we can simultanously reduce the computational effort and improve prediction accuracy! 
+						</p>
+					</section> -->
+				</section>
+				<section>
+					<section>
+						<h2>See it in action!</h2>
+						<div >
+							<a target="_blank" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/index'">Run the app >></a>
+	      				</div>
+					</section>
+					<section>
+						<p> App screenshot</p>
+						<div id="pinwrapper" >
+							<img width="800" height="520" src="../static/images/Slides/screenshot_app.jpeg" class="featurette-image img-responsive" alt="500x500">
+						</div>
+					</section>
+				</section>
+
+				<section>
+					<h2>Database preparation</h2>
+					<ul>
+						<li><p>NYC taxi trips dataset (20GB compressed csv) imported into MySQL</p></li>
+						<li><p>Cleaned inconsistent/wrong data</p></li>
+						<li><p>Created multiple search indices to speed up SQL queries</p></li>
+						<li><p>Database sharding for even more speed up</p></li>
+					</ul>
+				</section>
+
+				<section>
+					<section>
+						<h2>Predictive modelling</h2>
+						<ul>
+							<li><p>Built statistical models using 5 ML techniques: </p>
+								<ul>
+								<li> Ordinary least squares </li>
+								<li> Feasible weighted least squares </li>
+								<li> Bagging (of OLS predictors) </li>
+								<li> Random forest </li>
+								<li> Gradient boosting <!--(of decision trees)--> </li>
+								</ul>
+							</li>
+							<li><p>For each technique, a family of models was built using 3-5 dimensional hyperparameters (grid search)</p></li>
+							<li><p>Tested on out-of-sample data without and with spatial locality</p></li>
+						</ul>
+					</section>
+					
+					<section>
+						<h2>Out-of-sample R^2 scores:</h2>
+						<img width="800" height="520" src="../static/images/Slides/dur_Rcomparison.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+					<section>
+						<h2>R^2 scores</h2>
+						<p>Cluster size = 0.3 miles</p>
+						<img width="800" height="520" src="../static/images/Slides/dur_Rcomparison_0.3_cluster.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+					<section>
+						<h2>R^2 scores</h2>
+						<p>Cluster size = 0.8 miles</p>
+						<img width="800" height="520" src="../static/images/Slides/dur_Rcomparison_0.8_cluster.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+					<section>
+						<h2>R^2 scores</h2>
+						<p>Cluster size = 2 miles</p>
+						<img width="800" height="520" src="../static/images/Slides/dur_Rcomparison_2.0_cluster.png" class="featurette-image img-responsive" alt="500x500">
+					</section>
+
+
+					<!-- Ako imas vremena, slike koje pokazuju da za Radijus=0.3 i Radijus=0.8 je local vs all R^2 konzistentno bolji, ali za Radijus=2 je R^2 od local u prosjeku losiji od all (!!) -->
+
+				</section>
+
+				<!-- Example of nested vertical slides -->
+
+				<section>
+					<h2>Software stack</h2>
+					<p>Predictive model: 
+						<ul>
+							<li>built in Python using pandas and scikit-learn</li>
+							<li>embedded into a web application using the Flask framework</li>
+						</ul>
+					</p>
+					<p>Visualization:
+						<ul>
+							<li>built using JavaScript/Jquery</li>
+							<li>employed Leaflet library for interfacing the Mapbox geomapping engine</li>
+						</ul>
+					</p>
+				</section>
+
+				<section>
+					<h2>About me...</h2>
+ 					<p>Agata Brajdic</p>
+					<div id="pinwrapper" >
+						<div class="pincolumns" >
+							<div id="pincontainer"> 
+								<img src="../static/images/Slides/logo.png" height="70" alt="logo" /> 
+							</div>
+							<div id="pincontainer"> 
+								<img src="../static/images/Slides/me_in_trin.jpg" height="370" alt="hall" /> 
+							</div>
+							<div id="pincontainer" style="background: rgba(255, 255, 255, 1);"> 
+								<img src="../static/images/Slides/track_app_display_low_res.png" height="470"/> 
+							</div>
+							<div id="pincontainer"> 
+								<img src="../static/images/Slides/trolley.jpg" height="470" alt="hall" /> 
+							</div>
+
+						</div>
+					</div>
+				</section>
+
+
+				<section>
+					<h2>Backup slides</h2>
+					<p> Pickup trends</p>
+					<img width="800" height="520" src="../static/images/Slides/Pick_up_trend.png" class="featurette-image img-responsive" alt="500x500">
+				</section>
+				<section>
+					<h2>Backup slides</h2>
+					<p> Fare estimator example</p>
+					<img width="800" height="520" src="../static/images/Slides/Fare_example.png" class="featurette-image img-responsive" alt="500x500">
+				</section>
+
+
+			</div>
+
+		</div>
+
+
+
+		<!-- Slides animation -->
+		<script>
+			
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				dependencies: [
+					{ src: '../static/js/Slides/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: '../static/js/Slides/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../static/js/Slides/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../static/js/Slides/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '../static/js/Slides/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: '../static/js/Slides/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+
+		<!-- mapbox script -->
+		<script>
+		    L.mapbox.accessToken = 'pk.eyJ1IjoiYnViaWNhIiwiYSI6ImRIZ2V2YUEifQ.OZ0k0yNCosGah1fvb4ZkeQ';
+		    var center = [40.75, -73.99];
+		    var map = L.mapbox.map('map', 'examples.map-h67hf2ic', {zoomControl: false, scrollWheelZoom: false})
+		      .setView(center, 13);
+
+		    var  gJson_points  = [];
+
+		    document.getElementById("debug").innerHTML='Hello buba 3!';
+
+		    //init points
+		    for (var j = 0; j < 6; j++) {
+		      var jarr={
+		        type: "FeatureCollection",
+		        features: []
+		        };
+		      for (var i = 0; i < 5; i++) {
+		          jarr.features.push({
+		              type: 'Feature',
+		              properties: { sz: 10*(j+1)},
+		              geometry: {
+		                  type: 'Point',
+		                  coordinates: [center[1]+Math.random()*0.1, center[0]+Math.random()*0.01] //long, lat 
+		              }
+		          });
+		      };
+		      gJson_points.push(jarr);
+		    }
+
+		    var geoJson = null;
+
+		    var marker = L.marker([40.7127, -74.0059], {
+		        icon: L.mapbox.marker.icon({
+		          'marker-color': '#f86767'
+		        })
+		    });
+		    marker.addTo(map);
+
+		    
+		    var counter = 0;
+		    var objcnt = 0;
+
+		    function runAnimation(){
+		      objcnt = gJson_points.length;
+		      var timerId = window.setInterval(function() {
+		        if (geoJson !=null) { map.removeLayer(geoJson); }
+
+		        geoJson = L.geoJson(gJson_points[counter], {
+		        pointToLayer: function(feature, latlng) {
+		              return L.circleMarker(latlng, {
+		                  radius: feature.properties.sz,
+		                  fillColor:'#f5c272',
+		                  color:'#fa946e'
+		              })}});
+
+		        geoJson.addTo(map);
+		        counter = (counter+1)%objcnt;
+		      }, 1000);
+		    }
+
+		    function stopAnimation()
+		    {
+		      clearInterval(timerId);
+		    }
+		    function resetData(data) 
+		    {
+		      alert("Invoked");
+		      window.clearInterval(); //stop rendering
+
+		      // setup new data
+		      counter = 0;
+		      gJson_points = data;
+
+		      //restart
+		      runAnimation();
+		    }
+
+		    // Disable drag and zoom handlers.
+		    map.dragging.disable();
+		    map.touchZoom.disable();
+		    map.doubleClickZoom.disable();
+		    map.scrollWheelZoom.disable();
+
+		  </script>
+
+		  <script type=text/javascript>
+		    var runState = 0;
+		    $(function() {
+		      $("#animBtn").click(function() 
+		      {
+		        //Toggle runstate
+		        if (runState==0){runState=1;}
+		        else{runState=0;}
+
+		        // var btnTxt = $("#animBtn").text();
+		        $("#animBtn").text("Fetching data...");
+		        if (runState)
+		        {
+		             $.ajax({
+		                type: "POST",
+		                url: $SCRIPT_ROOT + "/data_anim/",
+		                contentType: "application/json; charset=utf-8",
+		                data: { start_p: ""}, 
+		                success: function(data) {
+		                  $("#animBtn").text("Stop animation");
+		                  resetData(data);
+		                }
+		             });
+		        }
+		        else 
+		        {
+		          $("#animBtn").text("Run animation");
+		          window.clearInterval(); 
+		        }
+		    });
+		  });
+		  </script>
+
+
+	</body>
+</html>
+	

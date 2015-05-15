@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html data-wf-site="53e145e907cd597827548905" class="wf-robotoslab-n7-active wf-robotoslab-n3-active wf-robotoslab-n4-active wf-robotoslab-n1-active wf-active w-mod-js w-mod-no-touch w-mod-video w-mod-no-ios wf-proximanova-n1-active wf-proximanova-n3-active wf-proximanova-n4-active wf-proximanova-n6-active wf-proximanova-n7-active">
+
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>CabCalc</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="Webflow">
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/normalize3.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/webflow3.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/taxi.webflow3.css">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <script type=text/javascript src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  
+  <script type=text/javascript>
+          var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>  
+</head>
+
+<body class="bg">
+  <div class="w-container">
+    <div class="logo">CabCalc</div>
+  </div>
+  <div class="w-container">
+    <div class="tagline">Know before you hail.</div>
+    <div class="tagline" id="err_msg", name="err_msg" style="color:#FF0000;">{{err_msg}}</div>
+  </div>
+  <div class="w-container">
+    <div class="texte-in-texte">Get an estimate of taxi trip duration and fare. </div>
+  </div>
+  <div class="w-container">
+    <div class="w-form">
+      <form class="form-container" id="data-form" name="data-form" data-name="data-form" action="/echo/" method="GET">
+        <div class="w-row">
+
+          <div class="w-col w-col-8">
+            <input class="w-input field" id="start_p" name="start_p" type="start" placeholder="Start location (e.g. Union Square)" data-name="start" required="required">
+          </div>
+
+          <div class="w-col w-col-8">
+            <input class="w-input field" id="end_p" name="end_p" type="end" placeholder="End location (e.g. Times Square)" data-name="end" required="required">
+          </div>
+          <div class="w-col w-col-8">
+          <div class="w-col w-col-6">
+            <input class="w-input field" id="date_p" name="date_p" type="date" placeholder="Date (yyyy-mm-dd)" data-name="date" required="required">
+          </div>
+          <div class="w-col w-col-1">
+            
+          </div>
+
+          <div class="w-col w-col-5">
+            <input class="w-input field" id="time_p" name="time_p" type="time" placeholder="Time (hh:mm)" data-name="time" required="required">
+          </div>
+          </div>
+          <div class="w-col w-col-4 centered">
+            <input class="w-button button center" type="submit" id='submitBtn' name='submitBtn' value="Get estimate" data-wait="Please wait..." data-ix="button-hover" style="transition: opacity 500ms, transform 500ms; -webkit-transition: opacity 500ms, transform 500ms; opacity: 1; transform: scale(1.05);">
+          </div>
+        </div>
+      </form>
+    </div>
+  
+    <div class="w-col w-col-7-5 column-centered">
+      <a class="button blue small" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/data_anim'">Animation</a>
+  
+      <a class="button blue small" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/slides'">See how it works</a>
+
+      <a class="button blue small" href="mailto:agata.brajdic@gmail.com?subject=CabCalc" target="_blank" data-ix="button-hover" style="opacity: 1;">
+      Email</a>
+    </div>
+  
+  <div class="w-container">
+    <div class="footer"></div>
+  </div>
+
+  
+
+  <script type="text/javascript" src="../static/js/Taxi/jquery.min.js"></script>
+  <script type="text/javascript" src="../static/js/Taxi/webflow.js"></script>
+  <!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif]-->
+
+</body></html>

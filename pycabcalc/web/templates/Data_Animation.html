@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html data-wf-site="53e145e907cd597827548905" class="wf-robotoslab-n7-active wf-robotoslab-n3-active wf-robotoslab-n4-active wf-robotoslab-n1-active wf-active w-mod-js w-mod-no-touch w-mod-video w-mod-no-ios wf-proximanova-n1-active wf-proximanova-n3-active wf-proximanova-n4-active wf-proximanova-n6-active wf-proximanova-n7-active">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Data Animation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="Webflow">
+
+  <!-- mapbox -->
+  <script src='https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.js'></script>
+  <link href="https://api.tiles.mapbox.com/mapbox.js/v2.0.1/mapbox.css" rel="stylesheet"> <!-- tiles -->
+  <link href="../static/css/Mapbox/mapbox_base.css" rel="stylesheet"> 
+  <link href="https://www.mapbox.com/mapbox.js/assets/css/site.css" rel="stylesheet">
+
+  <!-- generic look -->
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/normalize3.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/webflow3.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/taxi.webflow3.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/taxi.map.css">
+
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script type="text/javascript" src="../static/js/Taxi/modernizr.js"></script>
+  <script type="text/javascript" src="../static/js/Taxi/jquery.min.js"></script>
+  <script type="text/javascript" src="../static/js/Taxi/webflow.js"></script>
+  
+  <script type="text/javascript">
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script> 
+
+
+</head>
+
+<body class="bg">
+  <div class="w-container">
+    <div class="logo">CabCalc</div>
+  </div>
+  <div class="w-container">
+    <div class="tagline" id = "tagline" name="tagline">Animation of taxi traffic</div>
+  </div>
+  <div class="w-container">
+    <div class="tagline" id = "errtag" name="errtag" style="color:#FF0000;"></div>
+  </div>
+  
+  
+  <div class="w-container-form">
+        <div class="w-row" >
+
+          <nav class="w-col w-col-2_1 w-nav-menu" role="navigation" id="Month-nav">
+            <div class="nav-disableable w-dropdown" data-delay="0">
+            <div class="w-dropdown-toggle dropdown-toggle" id="Month-toggle" data-ix="dropdown-toggle">
+            <div id="Month-label">Month: All</div>
+            <div class="w-icon-dropdown-toggle dropdown-arrow" data-ix="dropdown-arrow"></div></div>
+
+            <nav class="w-dropdown-list dropdown-list">
+              <a class="w-dropdown-link" href="#" onclick="dropdownDisplay('Month', 'All')">Show All</a>
+              <a class="w-dropdown-link" id="Month-link-January"  href="#" onclick="dropdownDisplay('Month', 'January')">January</a>
+              <a class="w-dropdown-link" id="Month-link-February" href="#" onclick="dropdownDisplay('Month', 'February')">February</a>
+              <a class="w-dropdown-link" id="Month-link-March"    href="#" onclick="dropdownDisplay('Month', 'March')">March</a>
+              <a class="w-dropdown-link" id="Month-link-April"    href="#" onclick="dropdownDisplay('Month', 'April')">April</a>
+              <a class="w-dropdown-link" id="Month-link-May"      href="#" onclick="dropdownDisplay('Month', 'May')">May</a>
+              <a class="w-dropdown-link" id="Month-link-June"     href="#" onclick="dropdownDisplay('Month', 'June')">June</a>
+              <a class="w-dropdown-link" id="Month-link-July"     href="#" onclick="dropdownDisplay('Month', 'July')">July</a>
+              <a class="w-dropdown-link" id="Month-link-August"   href="#" onclick="dropdownDisplay('Month', 'August')">August</a>
+              <a class="w-dropdown-link" id="Month-link-September" href="#" onclick="dropdownDisplay('Month', 'September')">September</a>
+              <a class="w-dropdown-link" id="Month-link-October"  href="#" onclick="dropdownDisplay('Month', 'October')">October</a>
+              <a class="w-dropdown-link" id="Month-link-November" href="#" onclick="dropdownDisplay('Month', 'November')">November</a>
+              <a class="w-dropdown-link" id="Month-link-December" href="#" onclick="dropdownDisplay('Month', 'December')">December</a>
+              
+            </nav></div>
+          </nav>
+
+
+          <nav class="w-col w-col-2 w-nav-menu" role="navigation" style="margin-left:5px" id="Day-nav">
+            <div class="nav-disableable w-dropdown" data-delay="0">
+            <div class="w-dropdown-toggle dropdown-toggle" id="Day-toggle" data-ix="dropdown-toggle" > <!-- style="transition: opacity 0.5s ease 0s; -webkit-transition: opacity 0.5s ease 0s;" -->
+            <div id="Day-label">Day: All</div>
+            <div class="w-icon-dropdown-toggle dropdown-arrow" data-ix="dropdown-arrow" ></div></div>
+
+            <nav class="w-dropdown-list dropdown-list">
+              <a class="w-dropdown-link" href="#" onclick="dropdownDisplay('Day', 'All')">Show All</a>
+              <a class="w-dropdown-link" id="Day-link-Monday"   href="#" onclick="dropdownDisplay('Day','Monday')">Monday</a>
+              <a class="w-dropdown-link" id="Day-link-Tuesday"  href="#" onclick="dropdownDisplay('Day','Tuesday')">Tuesday</a>
+              <a class="w-dropdown-link" id="Day-link-Wednesday" href="#" onclick="dropdownDisplay('Day','Wednesday')">Wednesday</a>
+              <a class="w-dropdown-link" id="Day-link-Thursday" href="#" onclick="dropdownDisplay('Day','Thursday')">Thursday</a>
+              <a class="w-dropdown-link" id="Day-link-Friday"   href="#" onclick="dropdownDisplay('Day','Friday')">Friday</a>
+              <a class="w-dropdown-link" id="Day-link-Saturday" href="#" onclick="dropdownDisplay('Day','Saturday')">Saturday</a>
+              <a class="w-dropdown-link" id="Day-link-Sunday"   href="#" onclick="dropdownDisplay('Day','Sunday')">Sunday</a>
+            </nav></div>
+          </nav>
+
+          <nav class="w-col w-col-1_1 w-nav-menu" role="navigation" style="margin-left:5px" id="Hour-nav">
+            <div class="nav-disableable w-dropdown" data-delay="0">
+            <div class="w-dropdown-toggle dropdown-toggle" id="Hour-toggle" data-ix="dropdown-toggle">
+            <div id="Hour-label">Hour: All</div>
+            <div class="w-icon-dropdown-toggle dropdown-arrow" data-ix="dropdown-arrow"></div></div>
+
+            <nav class="w-dropdown-list dropdown-list">
+              <a class="w-dropdown-link" href="#" onclick="dropdownDisplay('Hour', 'All')">Show All</a>
+              <a class="w-dropdown-link" id="Hour-link-0" href="#" onclick="dropdownDisplay('Hour', '0')">0:00</a>
+              <a class="w-dropdown-link" id="Hour-link-1" href="#" onclick="dropdownDisplay('Hour', '1')">1:00</a>
+              <a class="w-dropdown-link" id="Hour-link-2" href="#" onclick="dropdownDisplay('Hour', '2')">2:00</a>
+              <a class="w-dropdown-link" id="Hour-link-3" href="#" onclick="dropdownDisplay('Hour', '3')">3:00</a>
+              <a class="w-dropdown-link" id="Hour-link-4" href="#" onclick="dropdownDisplay('Hour', '4')">4:00</a>
+              <a class="w-dropdown-link" id="Hour-link-5" href="#" onclick="dropdownDisplay('Hour', '5')">5:00</a>
+              <a class="w-dropdown-link" id="Hour-link-6" href="#" onclick="dropdownDisplay('Hour', '6')">6:00</a>
+              <a class="w-dropdown-link" id="Hour-link-7" href="#" onclick="dropdownDisplay('Hour', '7')">7:00</a>
+              <a class="w-dropdown-link" id="Hour-link-8" href="#" onclick="dropdownDisplay('Hour', '8')">8:00</a>
+              <a class="w-dropdown-link" id="Hour-link-9" href="#" onclick="dropdownDisplay('Hour', '9')">9:00</a>
+              <a class="w-dropdown-link" id="Hour-link-10" href="#" onclick="dropdownDisplay('Hour', '10')">10:00</a>
+              <a class="w-dropdown-link" id="Hour-link-11" href="#" onclick="dropdownDisplay('Hour', '11')">11:00</a>
+              <a class="w-dropdown-link" id="Hour-link-12" href="#" onclick="dropdownDisplay('Hour', '12')">12:00</a>
+              <a class="w-dropdown-link" id="Hour-link-13" href="#" onclick="dropdownDisplay('Hour', '13')">13:00</a>
+              <a class="w-dropdown-link" id="Hour-link-14" href="#" onclick="dropdownDisplay('Hour', '14')">14:00</a>
+              <a class="w-dropdown-link" id="Hour-link-15" href="#" onclick="dropdownDisplay('Hour', '15')">15:00</a>
+              <a class="w-dropdown-link" id="Hour-link-16" href="#" onclick="dropdownDisplay('Hour', '16')">16:00</a>
+              <a class="w-dropdown-link" id="Hour-link-17" href="#" onclick="dropdownDisplay('Hour', '17')">17:00</a>
+              <a class="w-dropdown-link" id="Hour-link-18" href="#" onclick="dropdownDisplay('Hour', '18')">18:00</a>
+              <a class="w-dropdown-link" id="Hour-link-19" href="#" onclick="dropdownDisplay('Hour', '19')">19:00</a>
+              <a class="w-dropdown-link" id="Hour-link-20" href="#" onclick="dropdownDisplay('Hour', '20')">20:00</a>
+              <a class="w-dropdown-link" id="Hour-link-21" href="#" onclick="dropdownDisplay('Hour', '21')">21:00</a>
+              <a class="w-dropdown-link" id="Hour-link-22" href="#" onclick="dropdownDisplay('Hour', '22')">22:00</a>
+              <a class="w-dropdown-link" id="Hour-link-23" href="#" onclick="dropdownDisplay('Hour', '23')">23:00</a>
+            </nav></div>
+          </nav>
+
+
+          <div class="w-col w-col-5" style="float:right;">
+            <button type='button' id='submitBtnPick' name='submitBtnPick' class="button blue" data-ix="button-hover" style="opacity: 0; margin: 0px 0px;">Show pickups</button> 
+          
+            <button type='button' id='submitBtnDrop' name='submitBtnDrop' class="button blue" data-ix="button-hover" style="opacity: 0; margin: 0px 0px;">Show dropoffs</button> 
+          </div>
+
+    </div>
+  </div>
+
+
+    <div style="center">
+
+    <!-- map container -->
+    <div class='map_container row19 fill-light'>
+          <div id="map" ></div>
+          <pre id='trend_tag' class='map_trend' style="visibility:hidden;"></pre>
+          <div><pre id='trend_info' class='map_info' onclick="hideInfo()" style="visibility:hidden;"></pre></div>
+    </div>
+  </div>
+
+
+  <script>
+    L.mapbox.accessToken = 'pk.eyJ1IjoiYnViaWNhIiwiYSI6ImRIZ2V2YUEifQ.OZ0k0yNCosGah1fvb4ZkeQ';
+    var center = [40.75, -73.95];
+    var map = L.mapbox.map('map', 'examples.map-h67hf2ic', {zoomControl: false, scrollWheelZoom: false})
+      .setView(center, 13);
+
+    var geoJson = null;
+    var featCollArr  = []; //list of feature collections (24 for hourly trend)
+    var trendVals = [];
+
+    var counter = 0;
+    var objcnt = 0;
+    var timeTag = document.getElementById('trend_tag');
+    var infoTag = document.getElementById('trend_info');
+    var timerId;
+    var infoShown = false;
+
+    function runAnimation(trend, trendVals, info)
+    {
+      objcnt = featCollArr.length; //24 in case of hourly trends
+
+      timerId = window.setInterval(function() {
+        if (geoJson !=null) { map.removeLayer(geoJson); }
+
+        //update trend tag
+        if (objcnt>1)
+        {
+          timeTag.innerHTML = trend + ': ' + trendVals[counter];
+          timeTag.style.visibility = "visible";
+        }
+
+        //update info tag
+        if (!infoShown)
+        {
+          infoTag.innerHTML = info + "<br/><br/><br/>[Click to close]";
+          infoTag.style.visibility = "visible";
+
+          infoShown = true;
+        }
+
+        //select the colors
+        var fillClr;
+        var rimClr;
+        if (runState==='pick')
+        {
+          fillClr = '#f5c272';
+          rimClr = '#fa946e';
+        }
+        else if(runState==='drop')
+        {
+          fillClr = '#CADFFF';
+          rimClr = '#4D94FF';
+        }
+
+        //update points
+        geoJson = L.geoJson(featCollArr[counter], {
+        pointToLayer: function(feature, latlng) {
+              return L.circleMarker(latlng, {
+                  radius: feature.properties.sz,
+                  fillColor: fillClr,
+                  color: rimClr
+              })}});
+
+        geoJson.addTo(map);
+        counter = (counter+1)%objcnt;
+      }, 500);
+    }
+
+    function stopAnimation()
+    {
+      if (geoJson !=null) { map.removeLayer(geoJson); }
+      timeTag.innerHTML = '';
+      infoShown = false;
+      infoTag.style.visibility = "hidden";
+      clearInterval(timerId);
+
+      // document.getElementById('tagline').innerHTML = "Animation of taxi traffic";
+
+    }
+
+    function resetData(data, trend, info) 
+    {
+      stopAnimation();
+      
+      var sortedkeys = [];
+      for(var key in data) {
+        sortedkeys[sortedkeys.length] = key;
+      }
+      sortedkeys.sort();
+
+      // setup new data
+      featCollArr = []
+         
+      for (var i=0; i<sortedkeys.length; i++){
+
+          var key = sortedkeys[i];
+
+          var featColl = {
+            type: "FeatureCollection",
+            features: []
+            };
+
+          var hdata = data[key];
+  
+          featColl.features = hdata;
+
+          featCollArr.push(featColl);
+      }
+
+      counter = 0;
+
+      //find the values in the counter
+      var valContainer;
+
+      if (trend=='Hour')
+        valContainer = document.getElementById("Hour-nav").getElementsByClassName("w-dropdown-list")[0]
+      else if (trend=='Day')
+        valContainer = document.getElementById("Day-nav").getElementsByClassName("w-dropdown-list")[0]
+      else if (trend=="Month")
+        valContainer = document.getElementById("Month-nav").getElementsByClassName("w-dropdown-list")[0]
+
+      var aTags = valContainer.getElementsByTagName("a");
+      var trendVals = [];
+      for (var i=1; i< aTags.length; i++)
+        trendVals.push(aTags[i].innerHTML)
+
+      //restart
+      runAnimation(trend, trendVals, info);
+    }
+
+    // Disable zoom handlers.
+    // map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.scrollWheelZoom.disable();
+
+  </script>
+
+  <script>
+    var runState = null;
+    function animate(trend)
+    {
+
+          //Reset labels
+          $("#submitBtnPick").text("Show pickups");
+          $("#submitBtnDrop").text("Show dropoffs");
+          $("#errtag").text("");
+
+          var buttEl;
+          if (trend === 'pick')
+              buttEl = $("#submitBtnPick"); 
+          else if (trend === 'drop')
+              buttEl = $("#submitBtnDrop");
+
+          if (runState && runState === trend)
+          {
+              //Stop the animation that is in progress
+              stopAnimation(); 
+              runState = null;
+          }
+          else
+          {
+              //Stop the previous animation taht is in progress but later start a new one
+              stopAnimation(); 
+              runState = trend;
+              buttEl.text("Fetching data...");
+          }
+
+          if (runState)
+          {
+
+                var selectedEls = document.getElementsByClassName("selected");
+                var monthVal = null;
+                var dayVal = null;
+                var hourVal = null;
+
+                for (var i=0; i< selectedEls.length; i++)
+                {
+                    var el = selectedEls[i];
+                    if (el.id.indexOf("Month")>=0)
+                    {
+                      console.log("Month selected");
+                      monthVal = el.id.substring(11);
+                    }
+                    else if(el.id.indexOf("Day")>=0)
+                    {
+                      dayVal = el.id.substring(9);
+                    }
+                    else if(el.id.indexOf("Hour")>=0)
+                    {
+                      hourVal = el.id.substring(10);
+                    }
+                }
+                console.log("Selected"+selectedEls.length);
+               //Starting a new animation
+               $.ajax({
+                  type: "GET",
+                  url: $SCRIPT_ROOT + "/data_anim_fetch/",
+                  contentType: "application/json; charset=utf-8",
+                  data: { day: dayVal, month:monthVal, hour: hourVal, pick_drop: trend}, 
+                  success: function(output) {
+
+                    buttEl.text("Stop animation");
+
+                    var data = null;  
+                    var trend = null;
+                    var trend_vals = null;
+                    var info = null;
+
+                    for (var key in output){
+                      console.log("Key "+key);
+                      var errFlag = 0;
+                      if (key=="errMsg")
+                      {
+                        errFlag=1;
+                        stopAnimation();
+                        $("#errtag").text("Error in input!");
+                      }
+                      else if (key=="data")
+                          data = output['data']
+                      else if (key=="trend_vals")
+                          trend_vals = output['trend_vals']
+                      else if (key=="info")
+                          info = output['info']
+                      else if (key=="trend")
+                          trend = output['trend']
+                    }
+
+                    if (data){
+                      resetData(data, trend, info);
+                    }
+                  }
+               });
+          }
+
+      }
+  </script>
+
+  <script type=text/javascript>
+    
+    //Listeners
+    $("#submitBtnPick").click(function(){animate("pick");});
+    $("#submitBtnDrop").click(function(){animate("drop");});
+
+  </script>
+
+
+  <script type="text/javascript">
+
+    function hideInfo()
+    {
+        // document.getElementById("trend_info").innerHTML=""
+        document.getElementById("trend_info").style.visibility = "hidden";
+    }
+    //Interactions with the dropdown display
+
+    function dropdownDisplay(elTyp, val)
+    {
+      
+      //Display selected one
+      if (elTyp==="Hour" && val !="All")
+        document.getElementById(elTyp+"-label").innerHTML = elTyp+": "+val+":00";   
+      else
+        document.getElementById(elTyp+"-label").innerHTML = elTyp+": "+val;   
+
+      var parentTag = document.getElementById(elTyp+"-nav")
+
+      //unselect all elements in the list
+      var links = parentTag.getElementsByClassName("w-dropdown-link");
+      for (var i=0; i< links.length; i++)
+      {
+        var el = links[i];
+        el.className = el.className.replace(/\bselected\b/,'');
+      }
+
+      //mark the selected one
+      var selectedLink = document.getElementById(elTyp+"-link-"+val);
+      if (selectedLink)
+        //NOTE: ALL represents no selection!
+        selectedLink.className += " selected";
+
+
+      // retrieve all "opened" child elements and close them
+      var openCh = parentTag.getElementsByClassName("w--open") ;
+      //NOTE: The returned collection openCh is a live collection, which means that the modification of the document affects the collection. 
+      
+      var l = openCh.length;
+      for (var i=l-1; i>= 0; i--)
+      {
+        var el = openCh[i];
+        el.className = el.className.replace(/\bw--open\b/,'');
+        
+      }
+
+      // var arrowEl = parentTag.getElementsByClassName("dropdown-arrow")[0]
+      // console.log("Arrow "+arrowEl)
+      // arrowEl.style = "transform: rotate(-90deg); transition: transform 500ms; -webkit-transition: transform 500ms;" 
+    }
+  </script> 
+
+
+</body></html>
