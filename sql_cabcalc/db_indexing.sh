@@ -2,27 +2,32 @@
 
 #Load the basic setup
 source db_setup.sh
-
-#Create/destroy table indices
-if [ $1 = "create" ];
-then 
-
-	TABLE_NAME=$2
-
-	echo "Adding index for table $TABLE_NAME combo 1 point"
-	SQL_CMD="ALTER TABLE "$TABLE_NAME" ADD INDEX ind_combo (pick_x, pick_y, drop_x, drop_y, pick_date)"
-	mysql -e "$SQL_CMD" -u root  $DB_NAME
 	
 
-elif [ $1 = "drop" ];
-then
-	echo "Dropping indices for $2"
+echo "Adding index: combo 1 point"
+SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_combo (pick_x, pick_y, drop_x, drop_y, pick_date)"
+mysql -e "$SQL_CMD" -u root  $DB_NAME
 
-	TABLE_NAME=$2
+	# echo "Adding index: trip distance"
+# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_trip_distance (trip_distance)"
+# mysql -e "$SQL_CMD" -u root  $DB_NAME
 
-	SQL_CMD="ALTER TABLE "$TABLE_NAME" DROP INDEX ind_combo"
-	mysql -e "$SQL_CMD" -u root  $DB_NAME
+# echo "Adding index: trip time"
+# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_trip_time_in_secs (trip_time_in_secs)"
+# mysql -e "$SQL_CMD" -u root  $DB_NAME
 
-else
-	echo "Supported options: create/drop."
-fi
+# echo "Adding index: pick point"
+# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_pick (pick_x, pick_y)"
+# mysql -e "$SQL_CMD" -u root  $DB_NAME
+
+# echo "Adding index: drop point"
+# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_drop (drop_x, drop_y)"
+# mysql -e "$SQL_CMD" -u root  $DB_NAME
+
+# echo "Adding index: all"
+# SQL_CMD="ALTER TABLE "$TRIP_TABLE_NAME" ADD INDEX ind_all (pick_x, pick_y, drop_x, drop_y, pick_date, drop_date, trip_time_in_secs, trip_distance, pick_lon, pick_lat, drop_lon, drop_lat)"
+# mysql -e "$SQL_CMD" -u root  $DB_NAME
+
+# echo "Reclaim free space"
+# SQL_CMD="OPTIMIZE TABLE "$FINAL_TABLE_NAME
+# mysql -e "$SQL_CMD" -u root  $DB_NAME

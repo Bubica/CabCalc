@@ -2,6 +2,7 @@
 
 DB_NAME=taxi
 TABLE_PREFIX=trip_
+WEATHER_TABLE_NAME=weather
 
 TRIP_CSV_DIR=/Users/bubica/Development/CODE/PROJECTS/InsightDataScience2014/Project/data/tripData2013
 FARE_CSV_DIR=/Users/bubica/Development/CODE/PROJECTS/InsightDataScience2014/Project/data/fareData2013

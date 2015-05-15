@@ -24,10 +24,36 @@ TH_TRIP_TIME_LOW=60 #at least 1 min long trip
 TH_TRIP_TIME_UP=4320 #at most 1.2 hours long trip (threshold selected using histogram of raw data)
 TH_TRIP_DIST_LOW=0.3 #at least half a kilometre long trip
 TH_TRIP_DIST_UP=15 #(threshold selected using histogram of raw data)
-TH_LON_LOW=-74.03 #Manhattan bounding box (not tight!)
-TH_LON_UP=-72.99
-TH_LAT_LOW=40.68
-TH_LAT_UP=40.9 	
+
+#Manhattan bounding box (not tight!)
+MAN_TH_LON_LOW=-74.03
+MAN_TH_LON_UP=-73.87
+MAN_TH_LAT_LOW=40.68
+MAN_TH_LAT_UP=40.9 	
+
+#approx NYC bounding box
+NYC_TH_LON_LOW=-74.06
+NYC_TH_LON_UP=-73.72
+NYC_TH_LAT_LOW=40.6
+NYC_TH_LAT_UP=40.9 
+
+BBOX="NYC"
+
+if [ $BBOX = "MAN" ];
+then
+	echo "MAN"
+	TH_LON_LOW=$MAN_TH_LON_LOW
+	TH_LON_UP=$MAN_TH_LON_UP
+	TH_LAT_LOW=$MAN_TH_LAT_LOW
+	TH_LAT_UP=$MAN_TH_LAT_UP
+else
+	echo "NOT MAN"
+	TH_LON_LOW=$NYC_TH_LON_LOW
+	TH_LON_UP=$NYC_TH_LON_UP
+	TH_LAT_LOW=$NYC_TH_LAT_LOW
+	TH_LAT_UP=$NYC_TH_LAT_UP
+fi
+
 TH_SPEED=30 #Allowed NYC speed limit
 TH_PASSANGER=1 #records with more than one passanger may have a detour - discard those
 TH_EUCL_DIST_LOW=0.25 #from the histogram of the sample of data
@@ -80,14 +106,12 @@ do
 	pick_date, drop_date, @passenger_count, trip_time_in_secs, trip_distance, pick_lon, pick_lat, 
 	drop_lon, drop_lat) 
 	SET
-	err_flag := IF(trip_distance/trip_time_in_secs * 3600 >"$TH_SPEED" OR @passenger_count>"$TH_PASSANGER" OR trip_distance<"$TH_TRIP_DIST_LOW" OR trip_distance>"$TH_TRIP_DIST_UP" OR trip_time_in_secs<"$TH_TRIP_TIME_LOW" OR trip_time_in_secs>"$TH_TRIP_TIME_UP" OR pick_lat<"$TH_LAT_LOW" OR pick_lat>"$TH_LAT_UP" OR drop_lat<"$TH_LAT_LOW" OR drop_lat>"$TH_LAT_UP", 1,0),
+	err_flag := IF(trip_distance/trip_time_in_secs * 3600 >"$TH_SPEED" OR @passenger_count>"$TH_PASSANGER" OR trip_distance<"$TH_TRIP_DIST_LOW" OR trip_distance>"$TH_TRIP_DIST_UP" OR trip_time_in_secs<"$TH_TRIP_TIME_LOW" OR trip_time_in_secs>"$TH_TRIP_TIME_UP" OR pick_lon<"$TH_LON_LOW" OR pick_lon>"$TH_LON_UP" OR drop_lon<"$TH_LON_LOW" OR drop_lon>"$TH_LON_UP" OR pick_lat<"$TH_LAT_LOW" OR pick_lat>"$TH_LAT_UP" OR drop_lat<"$TH_LAT_LOW" OR drop_lat>"$TH_LAT_UP", 1,0),
 	pick_x:=3959 * COS(RADIANS(pick_lat)) * COS(RADIANS(pick_lon)), 
 	pick_y:=3959 * COS(RADIANS(pick_lat)) * SIN(RADIANS(pick_lon)), 
 	drop_x:=3959 * COS(RADIANS(drop_lat)) * COS(RADIANS(drop_lon)), 
 	drop_y:=3959 * COS(RADIANS(drop_lat)) * SIN(RADIANS(drop_lon))"
 
-	# If dropping non Manhattan routes:
-	# err_flag := IF(trip_distance/trip_time_in_secs * 3600 >"$TH_SPEED" OR @passenger_count>"$TH_PASSANGER" OR trip_distance<"$TH_TRIP_DIST_LOW" OR trip_distance>"$TH_TRIP_DIST_UP" OR trip_time_in_secs<"$TH_TRIP_TIME_LOW" OR trip_time_in_secs>"$TH_TRIP_TIME_UP" OR pick_lon<"$TH_LON_LOW" OR pick_lon>"$TH_LON_UP" OR drop_lon<"$TH_LON_LOW" OR drop_lon>"$TH_LON_UP" OR pick_lat<"$TH_LAT_LOW" OR pick_lat>"$TH_LAT_UP" OR drop_lat<"$TH_LAT_LOW" OR drop_lat>"$TH_LAT_UP", 1,0),
 	mysql -e "$SQL_CMD" -u root  $DB_NAME
 
 	echo "Creating table $FARE_TABLE_NAME"
@@ -159,43 +183,7 @@ do
 	SQL_CMD="DELETE FROM "$FINAL_TABLE_NAME" WHERE err_flag=1"
 	mysql -e "$SQL_CMD" -u root $DB_NAME
 
-	echo "Deleting superfluous columns"
-	SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" DROP COLUMN ord_no, DROP COLUMN pick_lat, DROP COLUMN pick_lon, DROP COLUMN drop_lat, DROP COLUMN drop_lon"
-	mysql -e "$SQL_CMD" -u root  $DB_NAME
-
-	echo "Reclaim free space"
-	SQL_CMD="OPTIMIZE TABLE "$FINAL_TABLE_NAME
-	mysql -e "$SQL_CMD" -u root  $DB_NAME	
-
-	echo "Adding index: combo 1 point"
-	SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_combo (pick_x, pick_y, drop_x, drop_y, pick_date)"
-	mysql -e "$SQL_CMD" -u root  $DB_NAME
-	
-		# echo "Adding index: trip distance"
-	# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_trip_distance (trip_distance)"
-	# mysql -e "$SQL_CMD" -u root  $DB_NAME
-
-	# echo "Adding index: trip time"
-	# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_trip_time_in_secs (trip_time_in_secs)"
-	# mysql -e "$SQL_CMD" -u root  $DB_NAME
-
-	# echo "Adding index: pick point"
-	# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_pick (pick_x, pick_y)"
-	# mysql -e "$SQL_CMD" -u root  $DB_NAME
-
-	# echo "Adding index: drop point"
-	# SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" ADD INDEX ind_drop (drop_x, drop_y)"
-	# mysql -e "$SQL_CMD" -u root  $DB_NAME
-
-	# echo "Adding index: all"
-	# SQL_CMD="ALTER TABLE "$TRIP_TABLE_NAME" ADD INDEX ind_all (pick_x, pick_y, drop_x, drop_y, pick_date, drop_date, trip_time_in_secs, trip_distance, pick_lon, pick_lat, drop_lon, drop_lat)"
-	# mysql -e "$SQL_CMD" -u root  $DB_NAME
-
-	# echo "Reclaim free space"
-	# SQL_CMD="OPTIMIZE TABLE "$FINAL_TABLE_NAME
-	# mysql -e "$SQL_CMD" -u root  $DB_NAME
-
-	echo "Final size:"
+	echo "Curr size:"
 	mysql -e "$DB_SZ_COMMAND" -u root $DB_NAME
 
 done
