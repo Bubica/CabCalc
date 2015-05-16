@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Display latitude longitude on marker movement</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
+</head>
+<body>
+<style>
+pre.ui-coordinates {
+  position:absolute;
+  bottom:10px;
+  left:10px;
+  padding:5px 10px;
+  background:rgba(0,0,0,0.5);
+  color:#fff;
+  font-size:11px;
+  line-height:18px;
+  border-radius:3px;
+  }
+</style>
+<div id='map'></div>
+<pre id='coordinates' class='ui-coordinates'></pre>
+
+<script>
+L.mapbox.accessToken = 'pk.eyJ1IjoiYnViaWNhIiwiYSI6ImRIZ2V2YUEifQ.OZ0k0yNCosGah1fvb4ZkeQ';
+var center = [40.75, -73.95];
+    var map = L.mapbox.map('map', 'examples.map-h67hf2ic', {zoomControl: false, scrollWheelZoom: false})
+      .setView(center, 13);
+
+var coordinates = document.getElementById('coordinates');
+var clickList = [];
+
+
+// every time the marker is dragged, update the coordinates container
+// marker.on('dragend', ondragend);
+map.on('click', function (e) {
+
+    var marker = L.marker([e.latlng.lat, e.latlng.lng], {
+    icon: L.mapbox.marker.icon({
+      'marker-color': '#ff8888'
+    }),
+    draggable: false
+    }).addTo(map);
+
+    var m = marker.getLatLng();
+    coordinates.innerHTML = 'Latitude: ' + m.lat + '<br />Longitude: ' + m.lng;
+
+    clickList.push(e.latlng.toString());
+    console.log(clickList);
+});
+
+</script>
+
+<!--
+<script>
+    L.mapbox.accessToken = 
+    var center = [40.75, -73.95];
+    var map = L.mapbox.map('map', 'examples.map-h67hf2ic', {zoomControl: false, scrollWheelZoom: false})
+      .setView(center, 13);
+
+    var geoJson = null;
+    // var featCollArr = null;
+    var  featCollArr  = []; //list of 24 feature collections
+    
+    var counter = 0;
+    var objcnt = 0;
+    var timeTag = document.getElementById('timeTag');
+    var timerId;
+
+
+    function runAnimation(){
+      objcnt = featCollArr.length; //24
+
+      timerId = window.setInterval(function() {
+        if (geoJson !=null) { map.removeLayer(geoJson); }
+
+        //update time
+        timeTag.innerHTML = 'Time: ' + counter + ':00';
+
+        //update points
+        geoJson = L.geoJson(featCollArr[counter], {
+        pointToLayer: function(feature, latlng) {
+              return L.circleMarker(latlng, {
+                  radius: feature.properties.sz,
+                  fillColor:'#f5c272',
+                  color:'#fa946e'
+              })}});
+
+        geoJson.addTo(map);
+        counter = (counter+1)%objcnt;
+      }, 400);
+    }
+
+    function stopAnimation()
+    {
+      if (geoJson !=null) { map.removeLayer(geoJson); }
+      timeTag.innerHTML = '';
+      clearInterval(timerId);
+    }
+
+    function resetData(data) 
+    {
+      stopAnimation();
+      
+      var sortedkeys = [];
+      for(var key in data) {
+        sortedkeys[sortedkeys.length] = key;
+      }
+      sortedkeys.sort();
+
+      // setup new data
+      featCollArr = []
+         
+      for (var i=0; i<sortedkeys.length; i++){
+
+          var key = sortedkeys[i];
+
+          var featColl = {
+            type: "FeatureCollection",
+            features: []
+            };
+
+          var hdata = data[key];
+  
+          featColl.features = hdata;
+
+          featCollArr.push(featColl);
+      }
+
+      counter = 0;
+
+      //restart
+      runAnimation();
+    }
+
+    // Disable zoom handlers.
+    // map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.scrollWheelZoom.disable();
+
+  </script>
+-->
+</body>
+</html>
