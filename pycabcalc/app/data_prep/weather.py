@@ -7,12 +7,12 @@ import math
 from ..db import taxiDB 
 
 """
-Module for insering a new column which indicates the presence or precipitation for the given record (rain or snow).
+Module for insering values in the column which indicates the presence or precipitation for the given record (rain or snow).
 """
 
 def mark(month):
 
-    chunk_sz = 200000
+    chunk_sz = 20000
     trip_handler = taxiDB.TripQ()
     weather_handler = taxiDB.WeatherQ()
 
@@ -37,7 +37,7 @@ def mark(month):
         
         print "Next chunk, month: ", month, " Count:", cnt
         cnt +=1
-        
+
         trip_data['precip_f'], trip_data['precip_b'] = zip(*trip_data.pick_date.map(_time_match))
 
         # _checkManhattanBox(df)
@@ -45,8 +45,6 @@ def mark(month):
         # _deleteTempColumns(df)
 
         trip_handler.push2Db(month, trip_data, match_column = 'ord_no', store_columns=['precip_f', 'precip_b'])
-
-        return
 
 
 

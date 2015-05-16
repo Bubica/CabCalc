@@ -1,9 +1,8 @@
-import clean
 import sys
 
 import manhattan
 import shortestDist
-
+import weather
 
 def run(month, typ):
     
@@ -12,6 +11,9 @@ def run(month, typ):
 
     elif typ=='shortestDist':
         shortestDist.mark(month)
+
+    elif typ=='weather':
+        weather.mark(month)
 
 
 

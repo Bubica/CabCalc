@@ -3,6 +3,10 @@
 #Load the basic setup
 source db_setup.sh
 
+echo "Deleting marked records"
+SQL_CMD="DELETE FROM "$FINAL_TABLE_NAME" WHERE err_flag=1"
+mysql -e "$SQL_CMD" -u root $DB_NAME
+
 echo "Deleting superfluous columns"
 SQL_CMD="ALTER TABLE "$FINAL_TABLE_NAME" DROP COLUMN pick_lat, DROP COLUMN pick_lon, DROP COLUMN drop_lat, DROP COLUMN drop_lon"
 mysql -e "$SQL_CMD" -u root  $DB_NAME

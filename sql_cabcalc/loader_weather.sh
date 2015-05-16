@@ -19,7 +19,7 @@ do
 	station:='KYNC', 
 	events:= nullif(@fevents,'None'), 
 	conditions:= nullif(@fconditions,'None'), 
-	precip_float:= IF(@fprecip='None',0,@fprecip),
+	precip_float:= IF(@fprecip='None',0, @fprecip),
 	precip_bool := IF(precip_float>0.5 OR events LIKE '%Rain%' OR events LIKE '%Snow%', 1,0);"
 	mysql -e "$SQL_CMD" -u root  $DB_NAME
 

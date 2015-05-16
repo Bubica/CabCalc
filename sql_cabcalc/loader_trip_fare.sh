@@ -16,9 +16,6 @@ mysql -e "$SQL_CMD" -u root
 SQL_CMD="SET GLOBAL innodb_file_per_table=1"
 mysql -e "$SQL_CMD" -u root 
 
-#Set pythonpath
-export PYTHONPATH=$PY_DIR
-
 #Filter thresholds
 TH_TRIP_TIME_LOW=60 #at least 1 min long trip
 TH_TRIP_TIME_UP=4320 #at most 1.2 hours long trip (threshold selected using histogram of raw data)
@@ -170,14 +167,6 @@ do
 
 	echo "Interim size:"
 	mysql -e "$DB_SZ_COMMAND" -u root $DB_NAME
-
-	echo "Deleting marked records"
-	SQL_CMD="DELETE FROM "$FINAL_TABLE_NAME" WHERE err_flag=1"
-	mysql -e "$SQL_CMD" -u root $DB_NAME
-
-	echo "Invoking python script to mark non Manhattan routes"
-	echo $PYTHONPATH
-	# python -m $PY_MODULE $TABLE_ID manhattan
 
 	echo "Deleting marked records"
 	SQL_CMD="DELETE FROM "$FINAL_TABLE_NAME" WHERE err_flag=1"

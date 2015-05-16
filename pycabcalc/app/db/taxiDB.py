@@ -406,6 +406,9 @@ class TripQ(Q):
         Propagates changes to the database - simply replaces existing table with the values in the dataframe.
         match_column : column on which match between local dataframe and mysql table is performed
         store_columns: data to be pushed to the db is contained in these columns
+
+        NOTE: the columns of the given dataframe that we are pushing to the db need to match in their name 
+        with the columns in the db table
         """
         trip_table = self.getTripTbl(month)
 
@@ -428,6 +431,6 @@ class TripQ(Q):
             commit = False
             if i[0] % 1000: commit = True
 
-            print "Generic cmd:", cmd, "vals: ", vals
+            # print "Generic cmd:", cmd, "vals: ", vals
             self.dbHandler.modify(cmd, vals, commit = commit)
      

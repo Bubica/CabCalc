@@ -3,31 +3,29 @@ For every record in the database, computes the shortest distance between two poi
 server. Result of each computation is stored in a new column in the database table.
 """
 
-from ..geo import graphhopper_proxy as hop
+from ..geo.graphhopper import graphhopper_proxy as hop
 from ..db import taxiDB 
 from ..db.localDbHandler import DBHandler
 from ..geo.basic import toLonLat
 
 import math
 import numpy as np
-import db_util as db
 import pandas as pd
 
+
 def mark(month):
-    tblSz = db.tblSz(month)
-    chunkSz = 200000
-    dbChunks = int(math.ceil(tblSz/(1.*chunkSz)))
 
-    #Performing the operation on the chunk of data - to push the interim results to the db right after they have finished
-    for chunk in range(dbChunks):
+    chunk_sz = 200000
+    trip_handler = taxiDB.TripQ()
 
-        #start and end ord no of records retrieved
-        si = chunk*chunkSz
-        ei = (chunk+1)*chunkSz-1
+    chunk_iter = trip_handler.query_Month_Piecewise(month, chunkSz=chunk_sz)
 
-        print "Chunk...", si, ei
+    cnt = 0
+    #Performing the operation on the chunk of data - to push the interim results to the db after they have finished
+    for df in chunk_iter:
 
-        df = db.load(month, si, ei)
+        print "Next chunk, month: ", month, " Count:", cnt, 
+        cnt +=1
 
         df = _prepData(df)
         _computeShortestDist(df)
@@ -35,8 +33,10 @@ def mark(month):
         _updateErrFlag(df)
         _deleteTempColumns(df)
 
-        print "Storing...", si, ei
-        db.push2Db(month, df, columns=['err_flag'])
+        print "Storing..."
+        trip_handler.push2Db(month, df, match_column = 'ord_no', store_columns=['err_flag'])
+
+
 
 def _prepData(df):
     

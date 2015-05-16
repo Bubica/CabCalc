@@ -2,7 +2,6 @@ import matplotlib.path as mplPath
 from ..geo import basic as geoloc
 import numpy as np
 
-import db_util as db
 import math
 
 """
@@ -11,27 +10,22 @@ Module for marking records that have both start/end points on the Manhattan isla
 
 def mark(month):
 
-    tblSz = db.tblSz(month)
-    chunkSz = 200000
-    dbChunks = int(math.ceil(tblSz/(1.*chunkSz)))
+    chunk_sz = 20000
+    trip_handler = taxiDB.TripQ()
 
+    chunk_iter = trip_handler.query_Month_Piecewise(month, chunkSz=chunk_sz)
+
+    cnt = 0
     #Performing the operation on the chunk of data - to push the interim results to the db after they have finished
-    for chunk in range(dbChunks):
+    for df in chunk_iter:
 
-        #start and end ord no of records retrieved
-        si = chunk*chunkSz
-        ei = (chunk+1)*chunkSz-1
-
-        print "Chunk...", si, ei
-
-        df = db.load(month, si, ei)
+        print "Next chunk, month: ", month, " Count:", cnt, 
+        cnt +=1
 
         _checkManhattanBox(df)
-        _updateErrFlag(df)
-        _deleteTempColumns(df)
 
-        print "Storing...", si, ei
-        db.push2Db(month, df, columns=['err_flag'])
+        print "Storing..."
+        trip_handler.push2Db(month, df, match_column = 'ord_no', store_columns=['manhattan'])
 
 
 def _checkManhattanBox(df):
@@ -44,22 +38,13 @@ def _checkManhattanBox(df):
     bbox = mplPath.Path(np.array(Manhattan_BBox_xy))
     
     try:
-        df['manhattan'] = df.apply(lambda row:bbox.contains_point((row['pick_x'], row['pick_y'])) + bbox.contains_point((row['drop_x'], row['drop_y'])) ==2 , axis = 1)
-    
+        df['manhattan'] = df.apply(lambda row: bbox.contains_point((row['pick_x'], row['pick_y'])) + bbox.contains_point((row['drop_x'], row['drop_y'])) ==2 , axis = 1)
+        df['manhattan'] = df['manhattan'].map(lambda x: 1 if x else 0) #boolean to 0/1 int
+
     except:
             print "Some error... Exiting!"
             pass #silently exit
 
-def _deleteTempColumns(df):
-    """
-    Deletes extra columns inserted in this procedure.
-    """
-    del df['manhattan']
 
-def _updateErrFlag(df):
-    """ Sets err flag to 1 if one of the route points falls outside Manhattan island"""
-
-    markFunc = lambda row: 1 if not row['manhattan'] else row['err_flag']
-    df.err_flag = df.apply(markFunc, axis=1)
 
 
