@@ -122,7 +122,10 @@ class TripQ(Q):
 
     def query_Month_Piecewise(self, month, cols = 'All', chunkSz = 200000):
 
-        """ Loads the data from the db (starting with 'start' ord no and ending with 'end' """
+        """ 
+        Loads the data from the db in pieces.
+        The trip table requires a integer column named "ord_no" with unique value per record.
+        """
 
         trip_table = self.getTripTbl(month)
         

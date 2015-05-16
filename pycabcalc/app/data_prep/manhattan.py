@@ -3,6 +3,7 @@ from ..geo import basic as geoloc
 import numpy as np
 
 import math
+from ..db import taxiDB 
 
 """
 Module for marking records that have both start/end points on the Manhattan island (i.e. excluding other NYC boroughs)

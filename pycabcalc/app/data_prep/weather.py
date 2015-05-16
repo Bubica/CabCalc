@@ -2,7 +2,6 @@ import matplotlib.path as mplPath
 from ..geo import basic as geoloc
 import numpy as np
 
-import db_util as db
 import math
 from ..db import taxiDB 
 
