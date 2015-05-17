@@ -6,7 +6,7 @@ import calendar
 import pandas as pd
 import json
 
-import app.model_runner as runner
+import web_trip_predictor as predictor
 from app.trends.hub import traffic
 
 
@@ -161,22 +161,17 @@ def slidesPage():
     #Renders initial page
     return render_template('Slides.html')   
 
-@app.route('/echo/', methods=['GET'])
-def echo():
+@app.route('/est/', methods=['GET'])
+def est():
     
     str_start_p = request.args.get('start_p')
     str_end_p = request.args.get('end_p')
     str_time_p = request.args.get('time_p')
     str_date_p = request.args.get('date_p')
 
-    est = runner.get_est(str_start_p, str_end_p, str_time_p, str_date_p)
+    est = predictor.get_est(str_start_p, str_end_p, str_time_p, str_date_p)
     errMsg = est[-1]
 
-    print
-    print "Output addresses"
-    print est[3]
-    print est[4]
-    print 
     if errMsg is None:
         #Return the result
         time_est = int(round(est[0], 0))

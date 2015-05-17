@@ -10,6 +10,8 @@
   <link rel="stylesheet" type="text/css" href="../static/css/Taxi/normalize3.css">
   <link rel="stylesheet" type="text/css" href="../static/css/Taxi/webflow3.css">
   <link rel="stylesheet" type="text/css" href="../static/css/Taxi/taxi.webflow3.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/Taxi/spinner.css">
+
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <script type=text/javascript src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   
@@ -18,63 +20,107 @@
   </script>  
 </head>
 
-<body class="bg">
-  <div class="w-container">
-    <div class="logo">CabCalc</div>
-  </div>
-  <div class="w-container">
-    <div class="tagline">Know before you hail.</div>
-    <div class="tagline" id="err_msg", name="err_msg" style="color:#FF0000;">{{err_msg}}</div>
-  </div>
-  <div class="w-container">
-    <div class="texte-in-texte">Get an estimate of taxi trip duration and fare. </div>
-  </div>
-  <div class="w-container">
-    <div class="w-form">
-      <form class="form-container" id="data-form" name="data-form" data-name="data-form" action="/echo/" method="GET">
-        <div class="w-row">
+<body class="bg" onload="hideSpinner()">
+  <div id = "overlay" class = "overlay">
+    
+    <div class="w-container">
+      <div class="logo">CabCalc</div>
+    </div>
+    
+    <div class="w-container">
+      <div class="tagline">Know before you hail.</div>
+      <div class="tagline" id="err_msg", name="err_msg" style="color:#FF0000;">{{err_msg}}</div>
+    </div>
 
-          <div class="w-col w-col-8">
-            <input class="w-input field" id="start_p" name="start_p" type="start" placeholder="Start location (e.g. Union Square)" data-name="start" required="required">
-          </div>
+    <div class="w-container">
+      <div class="texte-in-texte">Get an estimate of taxi trip duration and fare. </div>
+    </div>
 
-          <div class="w-col w-col-8">
-            <input class="w-input field" id="end_p" name="end_p" type="end" placeholder="End location (e.g. Times Square)" data-name="end" required="required">
-          </div>
-          <div class="w-col w-col-8">
-          <div class="w-col w-col-6">
-            <input class="w-input field" id="date_p" name="date_p" type="date" placeholder="Date (yyyy-mm-dd)" data-name="date" required="required">
-          </div>
-          <div class="w-col w-col-1">
+    <div class="w-container">
+      <div class="w-form">
+        <form class="form-container" id="data-form" name="data-form" data-name="data-form" action="/est/" method="GET">
+          <div class="w-row">
+
+            <div class="w-col w-col-8">
+              <input class="w-input field" id="start_p" name="start_p" type="start" placeholder="Start location (e.g. Union Square)" data-name="start" required="required">
+            </div>
+
+            <div class="w-col w-col-8">
+              <input class="w-input field" id="end_p" name="end_p" type="end" placeholder="End location (e.g. Times Square)" data-name="end" required="required">
+            </div>
             
+            <div class="w-col w-col-8">
+              <div class="w-col w-col-6">
+                <input class="w-input field" id="date_p" name="date_p" type="date" placeholder="Date (yyyy-mm-dd)" data-name="date" required="required">
+              </div>
+              
+              <div class="w-col w-col-1"></div>
+
+              <div class="w-col w-col-5">
+                <input class="w-input field" id="time_p" name="time_p" type="time" placeholder="Time (hh:mm)" data-name="time" required="required">
+              </div>
+            </div>
+
+            <div class="w-col w-col-4 centered">
+              <input class="w-button button center" type="submit" id='submitBtn' name='submitBtn' value="Get estimate" data-wait="Please wait..." data-ix="button-hover" style="transition: opacity 500ms, transform 500ms; -webkit-transition: opacity 500ms, transform 500ms; opacity: 1; transform: scale(1.05);" onclick="showSpinner()">
+            </div>
           </div>
 
-          <div class="w-col w-col-5">
-            <input class="w-input field" id="time_p" name="time_p" type="time" placeholder="Time (hh:mm)" data-name="time" required="required">
-          </div>
-          </div>
-          <div class="w-col w-col-4 centered">
-            <input class="w-button button center" type="submit" id='submitBtn' name='submitBtn' value="Get estimate" data-wait="Please wait..." data-ix="button-hover" style="transition: opacity 500ms, transform 500ms; -webkit-transition: opacity 500ms, transform 500ms; opacity: 1; transform: scale(1.05);">
-          </div>
-        </div>
       </form>
     </div>
   
     <div class="w-col w-col-7-5 column-centered">
-      <a class="button blue small" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/data_anim'">Animation</a>
+      <a class="button blue small" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/data_anim'">
+        Animation
+      </a>
   
-      <a class="button blue small" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/slides'">See how it works</a>
-
+      <a class="button blue small" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/slides'">
+        See how it works
+      </a>
+      
       <a class="button blue small" href="mailto:agata.brajdic@gmail.com?subject=CabCalc" target="_blank" data-ix="button-hover" style="opacity: 1;">
-      Email</a>
+      Email
+      </a>
     </div>
-  
-  <div class="w-container">
-    <div class="footer"></div>
+
+    <div class="w-container">
+      <div class="footer"></div>
+    </div>
+    </div>
   </div>
 
-  
+  <div id = "spinner_container" class="spinner_container">
+    <div class="spinner"></div>
+    <div id="spinner_text" class="spinner_text">Loading data ....</div>
+  </div>
 
+  <script>
+
+    // Spinner functions
+
+    function showSpinner()
+    {
+      var spinner = document.getElementById("spinner_container");
+      // var spinner_text = document.getElementById("spinner_text");
+      // var overlay = document.getElementById("overlay");
+      spinner.className = spinner.className.replace(/\bhidden\b/,'');
+      // spinner_text.className = spinner_text.className.replace(/\bhidden\b/,'');
+      // overlay.className = overlay.className.replace(/\bhidden\b/,'');
+
+      $('#overlay').fadeOut();
+    }
+
+    function hideSpinner()
+    {
+      var spinner = document.getElementById("spinner_container");
+      // var overlay = document.getElementById("overlay");
+      spinner.className += " hidden";
+      // overlay.className += " hidden";
+
+      $('#overlay').fadeIn();
+    }
+
+  </script>
   <script type="text/javascript" src="../static/js/Taxi/jquery.min.js"></script>
   <script type="text/javascript" src="../static/js/Taxi/webflow.js"></script>
   <!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif]-->

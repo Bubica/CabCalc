@@ -3,7 +3,7 @@ from ..predict.predict import TripPredictor
 from collections import defaultdict
 from ..db.taxiDB import TripQ
 from ..geo import google_loc as google_loc 
-from ..geo import basic as geoloc
+from ..geo import tools as geotools
 
 from ..predict.models import baggingRegress as model_bag
 from ..predict.models import linearRegress as model_lin
@@ -86,7 +86,7 @@ class ValidationPredictor(TripPredictor):
         Computes shortest route for each entry in the dataframe.
         """
         sp = google_loc.googleDistMatrixEst
-        toLonLatPair = lambda px, py, dx, dy: (geoloc.toLonLat(px, py), geoloc.toLonLat(dx, dy)) #hack since double unpacking with asterisk does not work
+        toLonLatPair = lambda px, py, dx, dy: (geotools.toLonLat(px, py), geotools.toLonLat(dx, dy)) #hack since double unpacking with asterisk does not work
         df['shortest_route_dist'] = df.apply(lambda row: sp(*toLonLatPair(row['pick_x'], row['pick_y'], row['drop_x'], row['drop_y']))[0], axis = 1)
 
     def run(self):

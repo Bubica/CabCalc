@@ -7,7 +7,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn.utils import check_random_state
 
 #Validation
-import ..err.err_score as err
+from ..err import err_score as err
 
 """
 http://scikit-learn.org/stable/auto_examples/ensemble/plot_gradient_boosting_regression.html

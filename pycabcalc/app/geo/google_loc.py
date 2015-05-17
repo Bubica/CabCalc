@@ -20,23 +20,28 @@ def getDistance(orig, dest, travel_mode="driving"):
     travel_mode: walking or driving
     """
 
-    if type(orig) == str and type(dest) ==str:
+    if (type(orig) == str and type(dest) ==str) or (type(orig) == unicode and type(dest) == unicode):
         return _distFromText (orig, dest, travel_mode)
 
     elif type(orig) == tuple and type(dest) ==tuple:
         return _distFromCoord (orig, dest, travel_mode)
 
     else:
+        print type(orig), type(dest)
         raise ValueError ("Malformed input!")
 
 def _distFromCoord(orig_coord = (-73.990602, 40.731779), dest_coord =  (-73.976709, 40.731779), travel_mode="driving"):
 
-    print "Fetching distance info using Google service... "
+    print "Fetching distance info using Google service... (coord input) "
 
     o = str(orig_coord[1])+","+str(orig_coord[0])
     d = str(dest_coord[1])+","+str(dest_coord[0])
     url = ("http://maps.googleapis.com/maps/api/distancematrix/json?origins={0}&destinations={1}&mode="+travel_mode+"&language=en-EN&sensor=false").format(o,d)
     
+    print
+    print url
+    print
+
     result= simplejson.load(urllib.urlopen(url))
 
     travel_time = result['rows'][0]['elements'][0]['duration']['value']# in seconds
@@ -53,6 +58,10 @@ def _distFromText(orig_str, dest_str, travel_mode):
 
     url = ("http://maps.googleapis.com/maps/api/distancematrix/json?origins={0}&destinations={1}&mode="+travel_mode+"&language=en-EN&sensor=false").format(orig_str,dest_str)
     
+    print
+    print url
+    print
+
     result= simplejson.load(urllib.urlopen(url))
 
     travel_time = result['rows'][0]['elements'][0]['duration']['value']# in seconds

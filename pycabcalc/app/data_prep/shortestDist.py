@@ -5,7 +5,7 @@ server. Result of each computation is stored in a new column in the database tab
 
 from ..geo.graphhopper import graphhopper_proxy as hop
 from ..db import taxiDB 
-from ..geo.basic import toLonLat
+from ..geo.tools import toLonLat
 
 import math
 import numpy as np

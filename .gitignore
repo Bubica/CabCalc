@@ -1,6 +1,8 @@
 *.pyc
+*.pbf
 
 .pem
 
 .DS_Store
 ipy_notebook_sandbox
+external_resources

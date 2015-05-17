@@ -7,7 +7,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn.utils import check_random_state
 
 #Validation
-import ..err.err_score as err
+from ..err import err_score as err
 
 def run(X_train, X_test, y_train, y_test, n_estimators=10, max_samples=10):
     

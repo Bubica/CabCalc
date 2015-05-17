@@ -9,7 +9,7 @@ from pandas.stats.api import ols
 import pandas as pd
 
 #Validation
-import ..err.err_score as err
+from ..err import err_score as err
 
 def run(X_train, X_test, y_train, y_test):
 

@@ -3,8 +3,10 @@ import numpy as np
 import datetime
 import time
 import calendar
-import os
+import time
+
 from ..db.taxiDB import TripQ
+from ..geo import google_loc
 import models.baggingRegress as model_bag
 import models.linearRegress as model_lin
 import models.feasibleWLS as model_fwls
@@ -179,18 +181,26 @@ class TripPredictor(object):
 
         return est
 
-    def getEstimates(self, s_point, e_point, dist, date):
+    def getEstimates(self, s_point, e_point, date, dist_est = None):
+
         """
         Input: 
         start and end locations of the taxi ride (in lon/lat format)
         dist: distance between these two points (estimate of the average route)
         date when the taxi trip will be taken
         """
+
+        ts = time.time() #start timer
+
         self._loadTrainData(date, s_point, e_point)
+
+        dist = google_loc.getDistance(s_point, e_point)[0] #get an estimate of the distance between these two points
         durEst = self._estDuration(dist, date)
         fareEst = self._estFare (dist, date)
 
-        return durEst, fareEst
+        te = time.time()
+        t_delta = te - ts
 
+        return durEst, fareEst, t_delta
 
 

@@ -9,6 +9,9 @@
 #Merge weather and trip data
 source merge_trip_weather.sh
 
+#Merge mark Manhattan routes
+# source manhattan.sh
+
 #Delete interim data
 # source db_clean.sh
 

@@ -6,7 +6,7 @@ import sys
 import localDbHandler
 import time
 import math
-from ..geo import basic as geoloc
+from ..geo import tools as geotools
 
 
 """
@@ -166,8 +166,8 @@ class TripQ(Q):
         Provides a count of routes accross all months.
         NOTE: some c/p from query_Routes - TODO clean this up
         """
-        s_point = geoloc.sphericalConversion(*s_point_lonlat)
-        e_point = geoloc.sphericalConversion(*e_point_lonlat)
+        s_point = geotools.sphericalConversion(*s_point_lonlat)
+        e_point = geotools.sphericalConversion(*e_point_lonlat)
 
         #Define rectangle around the start point
         s_env_minx = s_point[0]-env_sz/2.
@@ -183,7 +183,7 @@ class TripQ(Q):
 
         month_cnt = {}
         for i in range(1,13):
-            tblName = getTripTbl(i)
+            tblName = self.getTripTbl(i)
             
             q = "SELECT COUNT(*) FROM " + tblName
             q = q + " WHERE "
@@ -202,8 +202,8 @@ class TripQ(Q):
         env_sz: size of the neighbouring area where to search for the points
         """
         
-        s_point = geoloc.sphericalConversion(*s_point_lonlat)
-        e_point = geoloc.sphericalConversion(*e_point_lonlat)
+        s_point = geotools.sphericalConversion(*s_point_lonlat)
+        e_point = geotools.sphericalConversion(*e_point_lonlat)
 
         #Define rectangle around the start point
         s_env_minx = s_point[0]-env_sz/2.
@@ -296,7 +296,7 @@ class TripQ(Q):
         s_end = t_end.second
 
         for i in xrange(m_start, m_end+1):
-            tbl = getTripTbl(i)
+            tbl = self.getTripTbl(i)
 
             rng = None #range of dates to search in this table, set to None when the whole table is searched
 
@@ -334,7 +334,7 @@ class TripQ(Q):
             smplCnt = smplPerMonth[m]
             if smplCnt <=0: continue
 
-            table = getTripTbl(m)
+            table = self.getTripTbl(m)
 
             q = "SELECT %s FROM %s AS trip" % (cols, table)
 
@@ -355,7 +355,7 @@ class TripQ(Q):
         Used for display/debugging purpose only.
         """
         
-        point = geoloc.sphericalConversion(*point_lonlat)
+        point = geotools.sphericalConversion(*point_lonlat)
         
         #Define rectangle around the point
         env_minx = point[0]-env_sz/2.

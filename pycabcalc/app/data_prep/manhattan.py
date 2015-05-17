@@ -1,5 +1,5 @@
 import matplotlib.path as mplPath
-from ..geo import basic as geoloc
+from ..geo import tools as geotools
 import numpy as np
 
 import math
@@ -35,7 +35,7 @@ def _checkManhattanBox(df):
     Use Manhattan bounding box to eliminate all non Manhattan records (i.e. trips that begin/terminate outside Manhattan island)
     """
     Manhattan_BBox_latlon = [(40.692142,-74.029655), (40.756409,-74.014206), (40.831005,-73.960991), (40.880343,-73.935242), (40.872296,-73.907433),(40.834382,-73.933868),(40.808921,-73.933182), (40.801218,-73.925629),(40.775131,-73.940392),(40.733259,-73.970947),(40.708540,-73.972664),(40.704896,-73.995667)]
-    Manhattan_BBox_xy = [geoloc.sphericalConversion(lon, lat) for lat, lon in Manhattan_BBox_latlon]
+    Manhattan_BBox_xy = [geotools.sphericalConversion(lon, lat) for lat, lon in Manhattan_BBox_latlon]
     bbox = mplPath.Path(np.array(Manhattan_BBox_xy))
     
     try:
