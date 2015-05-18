@@ -7,7 +7,7 @@
 # source loader_weather.sh
 
 #Merge weather and trip data
-source merge_trip_weather.sh
+# source merge_trip_weather.sh
 
 #Merge mark Manhattan routes
 # source manhattan.sh

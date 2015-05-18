@@ -38,7 +38,7 @@
 
     <div class="w-container">
       <div class="w-form">
-        <form class="form-container" id="data-form" name="data-form" data-name="data-form" action="/est/" method="GET">
+        <div class="form-container" id="data-form" name="data-form" data-name="data-form"><!--  action="/est/" method="GET">  -->
           <div class="w-row">
 
             <div class="w-col w-col-8">
@@ -50,23 +50,25 @@
             </div>
             
             <div class="w-col w-col-8">
-              <div class="w-col w-col-6">
-                <input class="w-input field" id="date_p" name="date_p" type="date" placeholder="Date (yyyy-mm-dd)" data-name="date" required="required">
+              <div class="w-col w-col-3">
+                <input class="w-input field" id="date_month_p" name="date_month_p" placeholder="Month" data-name="date" required="required">
               </div>
-              
-              <div class="w-col w-col-1"></div>
 
-              <div class="w-col w-col-5">
-                <input class="w-input field" id="time_p" name="time_p" type="time" placeholder="Time (hh:mm)" data-name="time" required="required">
+              <div class="w-col w-col-3">
+                <input class="w-input field" id="date_day_p" name="date_day_p" placeholder="Day" data-name="date" required="required" style="margin-left:10px;">
+              </div>
+
+              <div class="w-col w-col-4">
+                <input class="w-input field" id="time_p" name="time_p" type="time" placeholder="Time (hh:mm)" data-name="time" required="required"  style="text-align:center; margin-left:20px;">
               </div>
             </div>
 
             <div class="w-col w-col-4 centered">
-              <input class="w-button button center" type="submit" id='submitBtn' name='submitBtn' value="Get estimate" data-wait="Please wait..." data-ix="button-hover" style="transition: opacity 500ms, transform 500ms; -webkit-transition: opacity 500ms, transform 500ms; opacity: 1; transform: scale(1.05);" onclick="showSpinner()">
+              <input class="w-button button center" type="submit" id='submitBtn' name='submitBtn' value="Get estimate" data-wait="Please wait..." data-ix="button-hover" style="transition: opacity 500ms, transform 500ms; -webkit-transition: opacity 500ms, transform 500ms; opacity: 1; transform: scale(1.05);" > <!-- onclick="showSpinner();"> -->
             </div>
           </div>
 
-      </form>
+      </div>
     </div>
   
     <div class="w-col w-col-7-5 column-centered">
@@ -74,11 +76,11 @@
         Animation
       </a>
   
-      <a class="button blue small" data-ix="button-hover" style="opacity: 1;" onclick="window.location.href='/slides'">
+      <a class="button blue small" data-ix="button-hover" style="opacity: 1; margin-left:3px;" onclick="window.location.href='/slides'">
         See how it works
       </a>
       
-      <a class="button blue small" href="mailto:agata.brajdic@gmail.com?subject=CabCalc" target="_blank" data-ix="button-hover" style="opacity: 1;">
+      <a class="button blue small" href="mailto:agata.brajdic@gmail.com?subject=CabCalc" target="_blank" data-ix="button-hover" style="opacity: 1;margin-left:3px;">
       Email
       </a>
     </div>
@@ -89,23 +91,18 @@
     </div>
   </div>
 
-  <div id = "spinner_container" class="spinner_container">
+  <div id = "spinner_container" class="spinner_container hidden">
     <div class="spinner"></div>
-    <div id="spinner_text" class="spinner_text">Loading data ....</div>
+    <div id="spinner_text" class="spinner_text">Please wait ....</div>
   </div>
 
   <script>
 
     // Spinner functions
-
     function showSpinner()
     {
       var spinner = document.getElementById("spinner_container");
-      // var spinner_text = document.getElementById("spinner_text");
-      // var overlay = document.getElementById("overlay");
       spinner.className = spinner.className.replace(/\bhidden\b/,'');
-      // spinner_text.className = spinner_text.className.replace(/\bhidden\b/,'');
-      // overlay.className = overlay.className.replace(/\bhidden\b/,'');
 
       $('#overlay').fadeOut();
     }
@@ -113,14 +110,126 @@
     function hideSpinner()
     {
       var spinner = document.getElementById("spinner_container");
-      // var overlay = document.getElementById("overlay");
-      spinner.className += " hidden";
-      // overlay.className += " hidden";
+      if (!spinner.classList.contains("hidden")){
+        spinner.className += " hidden";
+      }
 
       $('#overlay').fadeIn();
     }
 
   </script>
+
+  <script>
+    
+    function inputTimeFormat(inTime)
+    {
+        var res = inTime.split(":");
+        if (res.length!=2)
+          return [null, "Malformed time: must be in format HH:MM"];
+
+        var hour = parseInt(res[0]);
+        var min = parseInt(res[1]);
+
+        console.log("Hour "+hour);
+
+        if (isNaN(hour) || hour<0 || hour>23)
+        {
+          return [null, "Malformed hour: must be a value from the range [0, 23]"];
+        }
+        if (isNaN(min) || min<0 || min>59)
+        {
+          return [null, "Malformed minutes: must be a value from the range [0, 59]"];
+        }
+
+        // convert back to str
+        hour = hour +"";
+        min = min +"";
+
+        //add leading zero
+        if (hour.length==1) {hour = "0"+hour;}
+        if (min.length==1) {min = "0"+min;}
+
+        return [hour+":"+min, ""];
+    }
+
+    function inputDateFormat(inDateDay, inDateMonth)
+    {
+        var day = parseInt(inDateDay);
+        var month = parseInt(inDateMonth);
+
+        var currentTime = new Date();
+        var currMonth = currentTime.getMonth()+1;
+        var year = currentTime.getFullYear();
+
+        if (isNaN(month) || month<1 || month>12)
+          return [null, "Malformed month"];
+
+        else if (month< currMonth)
+          year +=1;
+
+        if (isNaN(day) || day<1 || day>31 || new Date(year, month, 0).getDate() < day) //check if given month has that many days
+          return [null, "Malformed day"];
+
+        // convert back to str
+        month = month +"";
+        day = day +"";
+
+        //add leading zero
+        if (month.length==1) month = "0"+month;
+        if (day.length==1) day = "0"+day;
+
+        return [year+"-"+month+"-"+day, ""]; //year is arbitrary - assuming stationary process
+    }
+
+    //Listener
+    $("#submitBtn").click(function(){
+
+      var startLocation = document.getElementById("start_p").value;
+      var endLocation = document.getElementById("end_p").value;
+      var month = document.getElementById("date_month_p").value;
+      var day = document.getElementById("date_day_p").value;
+      var time = document.getElementById("time_p").value;
+
+      var dateFormatted = inputDateFormat(day, month);
+      var timeFormatted = inputTimeFormat(time);
+
+      if (dateFormatted[1])
+      {
+          //err in date input
+          document.getElementById("err_msg").innerHTML = dateFormatted[1];
+          return;
+      }
+      else if (timeFormatted[1])
+      {
+          //err in time input
+          document.getElementById("err_msg").innerHTML = timeFormatted[1];
+          return;
+      }
+
+      showSpinner();
+
+      timeFormatted = timeFormatted[0];
+      dateFormatted = dateFormatted[0];
+
+
+      $.ajax({
+                  type: "GET",
+                  url: $SCRIPT_ROOT + "/est/",
+                  contentType: "application/json; charset=utf-8",
+                  data: { start_p: startLocation, end_p: endLocation, time_p: timeFormatted, date_p: dateFormatted}, 
+                  success: function(output) 
+                  {
+                    hideSpinner();
+                    document.body.innerHTML = '';
+                    document.write(output);
+
+                  }
+               });
+    });
+
+
+  </script>
+
   <script type="text/javascript" src="../static/js/Taxi/jquery.min.js"></script>
   <script type="text/javascript" src="../static/js/Taxi/webflow.js"></script>
   <!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif]-->

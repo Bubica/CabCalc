@@ -37,22 +37,6 @@ def data_anim_data_fetch():
     hour_str = str.lower(str(request.args.get('hour'))).strip().capitalize()
     pick_drop_str = str.lower(str(request.args.get('pick_drop'))).strip()
     
-
-    # if not month_str and not day_str and not hour_str:
-    #     errd['errMsg'] = "One option muset be selected (month, day or hour)!"
-    #     return Response(json.dumps(errd),  mimetype='application/json')
-
-    # if day_str not in list(calendar.day_name):
-    #     errd['errMsg'] = "Malformed day!"
-    #     return Response(json.dumps(errd),  mimetype='application/json')
-    # else:
-    #     day = list(calendar.day_name).index(day_str)
-    # if month_str not in list(calendar.month_name):
-    #     errd['errMsg'] = "Malformed month!"
-    #     return Response(json.dumps(errd),  mimetype='application/json')
-    # else:
-    #     month = list(calendar.month_name).index(month_str)
-
     
     month = None
     hour = None
@@ -163,22 +147,29 @@ def slidesPage():
 
 @app.route('/est/', methods=['GET'])
 def est():
-    
+
     str_start_p = request.args.get('start_p')
     str_end_p = request.args.get('end_p')
     str_time_p = request.args.get('time_p')
     str_date_p = request.args.get('date_p')
 
+    print 
+    print str_date_p
+    print str_time_p
+    print
+    
     est = predictor.get_est(str_start_p, str_end_p, str_time_p, str_date_p)
     errMsg = est[-1]
 
     if errMsg is None:
+
         #Return the result
         time_est = int(round(est[0], 0))
         walk_est = est[2]
         fare_est = est[1]
         origin_addr = est[3]
         dest_addr = est[4]
+
         return render_template('Taxi_Est.html', dur_est = str(time_est), walk_est=str(walk_est), fare_est=str(fare_est), origin_addr = origin_addr, dest_addr = dest_addr, err_msg = "")
     else: 
         return render_template('Taxi_Intro.html', err_msg = str(est[-1]))

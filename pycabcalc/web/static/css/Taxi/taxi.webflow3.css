@@ -381,6 +381,7 @@ html.w-mod-js *[data-ix="button-hover"] {
   .w-input,
   .w-select {
     height: auto;
+    padding: 19px 20px;
   }
   .texte-in-texte{
     padding-top: 20px;
