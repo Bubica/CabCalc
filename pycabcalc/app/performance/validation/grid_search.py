@@ -1,6 +1,4 @@
 import setup
-# from val_predict import ValidationPredictor
-
 import pandas as pd
 from val_predict import ValidationPredictor
 import sys

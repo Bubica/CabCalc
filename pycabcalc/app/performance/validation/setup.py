@@ -1,5 +1,3 @@
-import sys 
-sys.path.append("/Users/bubica/insight_link/code/python")
 from ..geo import google_loc as gmh 
 import datetime
 import calendar
@@ -16,10 +14,10 @@ def loadExpSetups():
     print "Loading experiment setups.... ",
 
     routes = _routes()
-    refDates, trainInt, testInt = _dates()
-    trainSmpl, testSmpl = _sampleNo()
+    refDates, trainInt, testInt = dates()
+    trainSmpl, testSmpl = sampleNo()
     estTyp = _estimatorType()
-    trainArea, testArea = _areas()
+    trainArea, testArea = areas()
 
     expSetups = pd.DataFrame(columns = ['route', 'date', 'trainInt', 'testInt', 'trainSmpl', 'testSmpl', 'trainArea', 'testArea', 'estTyp'])
 
@@ -70,7 +68,7 @@ def loadModelSetups():
 
 """ ***************************************************************************************************************************** """
 
-def _dates():
+def dates():
     """
     Define validation times used in the validation to compose the training set of points.
     """
@@ -133,24 +131,24 @@ def _routes():
 
     return routes
 
-def _areas():
+def areas():
     #The largest value of train area denotes approach of using all routes in the database for training
     trainA = [0.3,0.8,2,1000000] 
     testA = [0.3]
 
     return trainA, testA
 
-def _sampleNo():
+def sampleNo():
     #No of samples used in train/test dataset
     train_samples = [100]#[100000] # TODO remove temp max no of samples in train/test set
     test_samples = [15] #[10000]
 
     return train_samples, test_samples
 
-def _estimatorType():
+def estimatorType():
     return ['dist'] #'fare'
 
-def _modelParams():
+def modelParams():
     """ 
     Returns all different model parameters used in validation
     """

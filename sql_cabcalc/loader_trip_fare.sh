@@ -2,6 +2,7 @@
 
 #Load the basic setup
 source db_setup.sh
+source db_size.sh
 
 #Prefixes of temp tables
 TRIP_TABLE_PREFIX=trip_tmp_
@@ -128,7 +129,7 @@ do
     mysql -e "$SQL_CMD" -u root $DB_NAME
 
 	echo "Size:"
-	mysql -e "$DB_SZ_COMMAND" -u root $DB_NAME
+	print_db_size
 
 	echo "Merging fare and trip data into final table $FINAL_TABLE_NAME"
 
@@ -166,14 +167,14 @@ do
 	mysql -e "$SQL_CMD" -u root  $DB_NAME
 
 	echo "Interim size:"
-	mysql -e "$DB_SZ_COMMAND" -u root $DB_NAME
+	print_db_size
 
 	echo "Deleting marked records"
 	SQL_CMD="DELETE FROM "$FINAL_TABLE_NAME" WHERE err_flag=1"
 	mysql -e "$SQL_CMD" -u root $DB_NAME
 
 	echo "Curr size:"
-	mysql -e "$DB_SZ_COMMAND" -u root $DB_NAME
+	print_db_size
 
 done
 

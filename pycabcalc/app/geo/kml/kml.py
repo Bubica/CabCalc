@@ -5,8 +5,11 @@ import numpy
 
 """
 DEBUGGING ONLY!
+Module used for generating output in kml format that can be directly displayed on google maps.
+For kml display use the tool found at: http://display-kml.appspot.com
 
-Handles KML representation of the traversed path (defined by the sequence of points).
+
+Handles KML representation of the  collection of points or the traversed path (defined by the sequence of points).
 Used for display purposes (debugging only).
 """
 def _exportPath(latitude, longitude,  color="7f0000ff"):
@@ -23,6 +26,7 @@ def _exportPath(latitude, longitude,  color="7f0000ff"):
     return path
 
 def _header():
+    # Standard kml header
     header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     header = header+"<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n"
     header = header+"<Document>\n"
@@ -59,9 +63,11 @@ def route(latitude, longitude):
     
     return doc
 """
-Return the kml string that displays the collection of points.
+Return string in kml format that displays the collection of points.
+Each point is represented as a tuple, where the first element contains the longitude and the second the latitude of the point.
+Points can be displayed in two colors (for comparison purposes.
 """
-def points(dot_p=[], pin_p=[]):
+def points(red_points=[], blue_points=[]):
     doc = _header()
 
     #Add the style
@@ -87,10 +93,20 @@ def points(dot_p=[], pin_p=[]):
         <width>2</width>
       </LineStyle>
     </Style>
+    <Style id="blueDot">
+      <IconStyle>
+        <Icon>
+          <href>https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle_blue.png</href>
+        </Icon>
+      </IconStyle>
+      <LineStyle>
+        <width>2</width>
+      </LineStyle>
+    </Style>
     """ 
     doc = doc + "<Folder>"
     
-    for pi in dot_p:
+    for pi in red_points:
 
         doc = doc + """
         <Placemark>
@@ -105,12 +121,12 @@ def points(dot_p=[], pin_p=[]):
         </Placemark>
         """
 
-    for pi in pin_p:
+    for pi in blue_points:
 
         doc = doc + """
         <Placemark>
         <visibility>0</visibility>
-        <styleUrl>#yellowPin</styleUrl>
+        <styleUrl>#blueDot</styleUrl>
         <Point>
           <altitudeMode>absolute</altitudeMode>
           <coordinates>"""

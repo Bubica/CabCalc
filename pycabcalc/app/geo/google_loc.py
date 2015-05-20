@@ -4,13 +4,17 @@ from google.directions import GoogleDirections
 import pandas as pd
 import urllib, cStringIO
 import re
+import os
 import sys
 import time
+import ConfigParser
 
 """
-Module provides interface to google locaiton services.
+Module provides interface to google location services.
 """
-googleApiKey = "AIzaSyCHilq6xDoEfriu3E24bMls67BTUaMBoDM"
+config = ConfigParser.ConfigParser()
+config.read(os.path.dirname(__file__)+"/"+"key.ini")
+googleApiKey = config.get('Google', 'key')
 
 
 def getDistance(orig, dest, travel_mode="driving"):
@@ -104,13 +108,16 @@ def onManhattan(point_lat = 40.732779, point_lng=-73.976709):
     
 
 def getRoute(orig_coord = (-73.990602, 40.731779), dest_coord =  (-73.976709, 40.751687)):
+
+    global googleApiKey
+
     st_code = 0
 
     sys.stdout.flush()
 
     while st_code is not 200:
         #Returns the list of routes Distance in metres and duration in sec (driving?!)
-        gd = GoogleDirections('AIzaSyCHilq6xDoEfriu3E24bMls67BTUaMBoDM')
+        gd = GoogleDirections(googleApiKey)
         try:
             res = gd.query(str((orig_coord[1], orig_coord[0])), str((dest_coord[1], dest_coord[0])))
         except TypeError:

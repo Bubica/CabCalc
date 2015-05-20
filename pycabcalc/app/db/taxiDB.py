@@ -195,7 +195,7 @@ class TripQ(Q):
 
         return month_cnt
 
-    def query_Routes(self, s_point_lonlat, e_point_lonlat, env_sz, date_span = None, limit=None, random=False):
+    def query_Routes(self, s_point_lonlat, e_point_lonlat, env_sz, date_span = None, limit=None, random=False, cols=None):
         """
         Find all routes in the database that start in the rectangle neighbourhood of the start point and terminate in the
         neighbourhood of the end point.
@@ -222,17 +222,20 @@ class TripQ(Q):
             t2 = datetime.datetime(2013, 12, 31, 23, 59, 59) 
             date_span = (t1, t2)
 
-        searchTbls = self._searchTables(date_span[0], date_span[1])
+        searchTbls = self._tableTimeRange(date_span[0], date_span[1])
         df = pd.DataFrame([]) #resulting dataframe
         qtime = 0 #time profiling
 
-        cols = "*" #columns to return - return all
+        if not cols:
+            cols = "*" #columns to return - return all
+        else:
+            cols = ','.join(cols)
 
         for m in searchTbls.keys():
             
             table, rng = searchTbls[m]
 
-            q = "SELECT %s FROM %s AS trip" % (cols, table)
+            q = "SELECT %s FROM %s AS trip" % (cols, table)  #FORCE INDEX (ind_combo)
 
             #Where conditions
             q = q + " WHERE "
@@ -244,7 +247,7 @@ class TripQ(Q):
                 #only a subset of entries needed - depending on the time
                 t1 = rng[0]; t2 = rng[1]
                 qp=""
-                # qd=""
+                
 
                 if t1 is not None:
                     qp = qp + " DAY(pick_date) >= '" + str(t1.day) + "'"
@@ -259,7 +262,7 @@ class TripQ(Q):
                 q = q + " AND " + qp 
                 #q = q +" AND " + qd
 
-            if random: #SLOW! This is used wehn return random subset of routes from the db
+            if random: #SLOW! This is used when return random subset of routes from the db
                 q = q + "ORDER BY RAND()"
 
             if limit is not None:
@@ -273,12 +276,21 @@ class TripQ(Q):
         return df
 
 
-    def _searchTables(self, t_start, t_end):
+    def _tableTimeRange(self, t_start, t_end):
 
         """
         Returns the information where the data is stored based on the given time interval.
-        Each returned tuple containes the range of the data in the table that falls within the interval.
+        Each returned tuple containes the name of the table and the range of the data in the table that falls within the interval.
         If the range is not set (i.e. is None), then the all records in that table fall in the given range.
+
+        Example:
+
+        Output:
+        {4: ('trip_4', (datetime.datetime(2015, 4, 16, 17, 44), None)),
+        5: ('trip_5', None),
+        6: ('trip_6', None),
+        7: ('trip_7', None),
+        8: ('trip_8', (None, datetime.datetime(2015, 8, 12, 17, 44)))}
         """
 
         tbls = {}
@@ -314,31 +326,65 @@ class TripQ(Q):
 
         return tbls
 
-    def query_Random(self, num, months = [1,12]):
+    def query_Random(self, num, date_span = None, cols = None):
         """
         Returns num random samples from trip database.
         months: month range used to sample samples from
         """
-        #columns to return - all
-        cols = "*"
 
-        #random assingment of samples to different months
-        smplPerMonth = np.bincount(np.random.randint(months[0], months[1]+1, num))
-        print smplPerMonth
+        #columns to return
+        if not cols:
+            cols = "*" #columns to return - return all
+        else:
+            cols = ','.join(cols)
+
+        if date_span==None: #search all tables
+            t1 = datetime.datetime(2013, 1, 1, 0, 0, 0)
+            t2 = datetime.datetime(2013, 12, 31, 23, 59, 59) 
+            date_span = (t1, t2)
+
+        td = (date_span[1] - date_span[0]).days +1 #number of days in the interval
+
+        #random assingment of samples to different trip tables
+        rand_days = [date_span[0] + datetime.timedelta(i) for i in np.random.randint(0, td, num)] #random day instances from the interval
+        smpl_per_month = np.bincount([i.month for i in rand_days]) #retain months only and count how many of each
+        table_time_rng = self._tableTimeRange(date_span[0], date_span[1])#range of each trip table
 
         df = pd.DataFrame([]) #resulting dataframe
         qtime = 0
+        
+        for m in range(date_span[0].month, date_span[1].month+1):
 
-        for m in range(months[0], months[1]+1):
+            if m >= len(smpl_per_month): 
+                break
 
-            smplCnt = smplPerMonth[m]
-            if smplCnt <=0: continue
+            smpl_cnt = smpl_per_month[m]
+            if smpl_cnt <=0: continue
 
             table = self.getTripTbl(m)
+            rng = table_time_rng[m][1]
 
             q = "SELECT %s FROM %s AS trip" % (cols, table)
 
-            q = q + " ORDER BY RAND() LIMIT "+str(smplCnt) #slow, takes about 1 min per table - only for debugging
+            if rng is not None: 
+
+                #only a subset of entries needed - depending on the time
+                t1 = rng[0]
+                t2 = rng[1]
+                qp = ""
+
+                print type(t1)
+                if t1 is not None:
+                    qp = qp + " DAY(pick_date) >= " + str(t1.day)
+                    if t2 is not None:
+                        qp = qp + " AND "
+                    
+                if t2 is not None:
+                    qp = qp + " DAY(pick_date) <= " + str(t2.day)
+
+                q = q +" WHERE " + qp   
+
+            q = q + " ORDER BY RAND() LIMIT "+str(smpl_cnt) #slow, takes about 1 min per table - only for debugging
 
             dfq, qt = self._fetchData(q)
             qtime += qt
@@ -368,7 +414,7 @@ class TripQ(Q):
             t2 = datetime.datetime(2013, 12, 31, 23, 59, 59) 
             date_span = (t1, t2)
 
-        trip_tbls = self._searchTables(date_span[0], date_span[1]).values()
+        trip_tbls = self._tableTimeRange(date_span[0], date_span[1]).values()
 
         df = pd.DataFrame([])
 

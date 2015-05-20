@@ -17,3 +17,7 @@
 
 #Build indices
 # source db_indexing.sh
+
+#Print out size
+source db_size.sh
+print_db_size

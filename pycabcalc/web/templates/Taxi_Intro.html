@@ -154,6 +154,17 @@
 
     function inputDateFormat(inDateDay, inDateMonth)
     {
+        function isNum(input) { return /^\d+$/.test(input);} //closure to test if input is numeric
+
+        if (!isNum(inDateDay))
+        {
+            return [null, "Malformed day"];
+        }
+        else if (!isNum(inDateMonth))
+        {
+          return [null, "Malformed month"];
+        }
+        
         var day = parseInt(inDateDay);
         var month = parseInt(inDateMonth);
 
