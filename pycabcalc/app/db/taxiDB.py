@@ -18,6 +18,8 @@ is done in python pandas object.
 
 class Q(object):
 
+    force_index = "ind_combo" #forces this index when performing search (query_Routes only for now)
+
     """
     A generic query class.
     """
@@ -235,7 +237,10 @@ class TripQ(Q):
             
             table, rng = searchTbls[m]
 
-            q = "SELECT %s FROM %s AS trip" % (cols, table)  #FORCE INDEX (ind_combo)
+            q = "SELECT %s FROM %s AS trip " % (cols, table)  
+
+            if self.force_index:
+                q += " FORCE INDEX {0} ".format(self.force_index)
 
             #Where conditions
             q = q + " WHERE "
@@ -352,7 +357,7 @@ class TripQ(Q):
 
         df = pd.DataFrame([]) #resulting dataframe
         qtime = 0
-        
+
         for m in range(date_span[0].month, date_span[1].month+1):
 
             if m >= len(smpl_per_month): 
