@@ -1,0 +1,109 @@
+import pandas as pd
+import numpy as np
+import datetime
+import calendar
+import time
+
+import generic_predictor as gp
+
+from ...geo import google_loc
+from ..models import baggingRegress as model_bag
+from ..models import linearRegress as model_lin
+from ..models import feasibleWLS as model_fwls
+from ..models import randomForest as model_forest
+from ..models import gradientBoost as model_grad
+
+class TripPredictor(gp.TripPredictor):
+
+    search_area = 0.3 #area around start end point used for searching for train routes
+
+    def __init__(self, model = model_grad, modelParams=pd.Series([]), limit = None, search_area=None, interval_sz=None):
+
+        super(TripPredictor,self).__init__(model = model, modelParams=modelParams, limit = limit, interval_sz=interval_sz)
+
+        if search_area: 
+            self.search_area = search_area
+
+    def _loadTrainData(self, date, s_point, e_point):
+
+        tStart, tEnd = self._trainTimeInterval(date)
+        self.train_df = self._loadData(tStart, tEnd, s_point, e_point, self.search_area, self.limit)
+
+    def _loadData(self, ts, te, s_point, e_point, env_sz, limit):
+
+        """
+        Loads the train data from the database.
+        If the time interval falls out of 2013 time range, previous/subsequent year is replaced with data 
+        from 2013 for the  corresponding months.
+        """
+        t1 = time.time()
+        cols=['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_b'] #make sure columns match the ones defining search index in the database
+        # cols = None
+
+        td = (te - ts).days #interval in number of days
+
+        if ts.year < 2013:
+            s1 = datetime.datetime(2013,1, 1, 0, 0, 0)
+            e1 = te
+            cnt1 = None if self.limit is None else int(self.limit * (e1-s1).days/(1.*td))
+            df1 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s1, e1), limit=cnt1, cols=cols)
+
+            s2 = datetime.datetime(2013, ts.month, ts.day, ts.hour, ts.minute, ts.second)
+            e2 = datetime.datetime(2013,12, 31, 23, 59, 59)
+            cnt2 = None if self.limit is None else self.limit - cnt1
+            df2 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s2, e2), limit=cnt2, cols=cols)
+
+            df = pd.concat([df1, df2], axis = 0)
+
+            print
+            print cnt1, cnt2
+            print
+
+        elif te.year > 2013:
+            s1 = ts
+            e1 = datetime.datetime(2013,12, 31, 23, 59, 59)
+            cnt1 = None if self.limit is None else int(self.limit * (e1-s1).days/(1.*td))
+            df1 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s1, e1), limit=cnt1, cols=cols)
+
+            s2 = datetime.datetime(2013,1, 1, 0, 0, 0)
+            e2 = datetime.datetime(2013, te.month, te.day, te.hour, te.minute, te.second)
+            cnt2 = None if self.limit is None else self.limit - cnt1
+            df2 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s2, e2), limit=cnt2, cols=cols)
+
+            df = pd.concat([df1, df2], axis = 0)
+
+            print
+            print cnt1, cnt2
+            print
+
+        else:
+            df = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (ts,te), limit=limit, cols=cols)
+            print "HOW COME", ts, te
+
+        #Add additional features
+        self._addFeatures(df)
+        print "HEREEEEEE"
+        return df
+
+    def getEstimates(self, s_point, e_point, date):
+
+        """
+        Input: 
+        start and end locations of the taxi ride (in lon/lat format)
+        date when the taxi trip will be taken
+        """
+
+        ts = time.time() #start timer
+
+        self._loadTrainData(date, s_point, e_point)
+
+        dist = google_loc.getDistance(s_point, e_point)[0] #get an estimate of the distance between these two points
+        durEst = self._estDuration(dist, date)
+        fareEst = self._estFare (dist, date)
+
+        te = time.time()
+        t_delta = te - ts
+
+        return durEst, fareEst, t_delta
+
+
