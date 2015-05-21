@@ -31,7 +31,7 @@ def run(X_train, X_test, y_train, y_test, n_estimators=500,  max_depth=4, learni
 
     #Feature importance
     feature_importance_vals = clf.feature_importances_ #value of importance for each feature in X
-    feature_importance_indx = np.argsort(feature_importance_vals)
+    feature_importance_indx = np.argsort(feature_importance_vals)[::-1] #feature with max importance reported first
 
     #Validation
     rmse = err.RMSE(y_predicted, y_test)

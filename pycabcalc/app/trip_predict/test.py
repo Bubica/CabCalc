@@ -11,8 +11,8 @@ from predictor import all_routes
 def test_and_debug(module = all_routes):
 
     #Debugging & testing
-    str_start_p = "Union Square, NYC, USA"
-    str_end_p = "Times Square, NYC, USA"
+    str_start_p = "E 96th Street, NYC, USA"
+    str_end_p = "Union Square, NYC, USA"
 
     #Obtain loaction data from Google services (lon/lat coordinates and approx. route distance)
     done_flg = False

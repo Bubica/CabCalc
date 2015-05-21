@@ -6,6 +6,8 @@ import time
 
 import generic_predictor as gp
 
+from .. import manip
+
 from ...geo import google_loc
 from ..models import baggingRegress as model_bag
 from ..models import linearRegress as model_lin
@@ -37,7 +39,7 @@ class TripPredictor(gp.TripPredictor):
         from 2013 for the  corresponding months.
         """
         t1 = time.time()
-        cols=['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_b'] #make sure columns match the ones defining search index in the database
+        cols=['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b'] #make sure columns match the ones defining search index in the database
         # cols = None
 
         td = (te - ts).days #interval in number of days
@@ -55,10 +57,6 @@ class TripPredictor(gp.TripPredictor):
 
             df = pd.concat([df1, df2], axis = 0)
 
-            print
-            print cnt1, cnt2
-            print
-
         elif te.year > 2013:
             s1 = ts
             e1 = datetime.datetime(2013,12, 31, 23, 59, 59)
@@ -72,17 +70,15 @@ class TripPredictor(gp.TripPredictor):
 
             df = pd.concat([df1, df2], axis = 0)
 
-            print
-            print cnt1, cnt2
-            print
-
         else:
             df = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (ts,te), limit=limit, cols=cols)
-            print "HOW COME", ts, te
+
+        #Crude way of removing outliers
+        df = manip.filter_percentile(df, 'trip_distance', 95,5)
 
         #Add additional features
-        self._addFeatures(df)
-        print "HEREEEEEE"
+        df = self._addFeatures(df)
+
         return df
 
     def getEstimates(self, s_point, e_point, date):

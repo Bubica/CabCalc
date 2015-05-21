@@ -1,4 +1,4 @@
-import setup
+import setup as config
 import pandas as pd
 from val_predict import ValidationPredictor
 import sys
@@ -17,6 +17,14 @@ class Validator(object):
         self.predictor = ValidationPredictor()
         self.logger = log.Logger(folder+'validation_results.csv') 
 
+        #Basic config stored in default.ini file
+        config_fname = os.path.dirname(__file__)+"/"+"default.ini"
+        config.set_config_file(config_fname)
+
+        print "CONFIG FILE: ", config_fname
+        print
+
+
     def run(self):
 
         expSetups = setup.loadExpSetups()
@@ -32,7 +40,6 @@ class Validator(object):
 
             for im_ in range(len(modelSetups)):
 
-                
                 mSetup = modelSetups.loc[im_]
 
                 print "        Running  model setup ", im_, mSetup
@@ -40,6 +47,7 @@ class Validator(object):
                 self.predictor.updateModelSetup(mSetup) #Update model setup
                 results = self.predictor.run() #Train the model and store results
 
+                #LOG results
                 self.logger.set_setup(eSetup, mSetup)
                 self.logger.set_results(results)
                 self.logger.log() #push to file

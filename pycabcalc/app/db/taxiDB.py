@@ -60,6 +60,27 @@ class WeatherQ(Q):
     Class that performs weather related queries in the database.
     """
 
+    def query_All(self, cols='All', limit = None):
+        """
+        Returns weather data.
+        """
+        table = 'weather'
+
+        if cols =='All':
+            col_str = "*"
+        else:
+            col_str = ",".join(cols) #concatenate column names in one big string separated with commas
+            
+        q = "SELECT %s FROM %s " % (col_str, table)
+
+        if limit is not None:
+            q = q +" LIMIT "+str(limit)
+
+        df, qtime = self._fetchData(q)
+        print "Total query time", qtime
+
+        return df
+        
     def query_Month(self, month, cols = 'All',dof_pick=None, limit=None):
         """
         Returns weather data for the particular month in 2013.
@@ -224,6 +245,13 @@ class TripQ(Q):
             t2 = datetime.datetime(2013, 12, 31, 23, 59, 59) 
             date_span = (t1, t2)
 
+        if limit is not None:
+            #since a single Route query may result in several requests to the db (to the different tables), 
+            #limit value needs to be split so that total number of retrieved records matches requested number
+            td = (date_span[1] - date_span[0]).days +1 #number of days in the interval
+            rand_days = [date_span[0] + datetime.timedelta(i) for i in np.random.randint(0, td, limit)] #sample random dates from the interval
+            smpl_per_month = np.bincount([i.month for i in rand_days]) #retain months only and count how many of samples was sampled in each month
+
         searchTbls = self._tableTimeRange(date_span[0], date_span[1])
         df = pd.DataFrame([]) #resulting dataframe
         qtime = 0 #time profiling
@@ -240,7 +268,7 @@ class TripQ(Q):
             q = "SELECT %s FROM %s AS trip " % (cols, table)  
 
             if self.force_index:
-                q += " FORCE INDEX {0} ".format(self.force_index)
+                q += " FORCE INDEX ({0}) ".format(self.force_index)
 
             #Where conditions
             q = q + " WHERE "
@@ -271,7 +299,9 @@ class TripQ(Q):
                 q = q + "ORDER BY RAND()"
 
             if limit is not None:
-                q = q +" LIMIT "+str(limit)
+                smpl = smpl_per_month[m]
+                print "LIMIT"
+                q = q +" LIMIT "+str(smpl)
         
             dfq, qt = self._fetchData(q)
             df = pd.concat([df, dfq], axis = 0)

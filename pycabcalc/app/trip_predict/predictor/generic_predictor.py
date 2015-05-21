@@ -4,6 +4,9 @@ Defines the generic behaviour of TripPredictor instance.
 import pandas as pd
 import numpy as np
 import datetime
+import itertools
+
+from sklearn.preprocessing import OneHotEncoder
 
 from ...db.taxiDB import TripQ
 from ...geo import google_loc
@@ -12,6 +15,19 @@ from ..models import linearRegress as model_lin
 from ..models import feasibleWLS as model_fwls
 from ..models import randomForest as model_forest
 from ..models import gradientBoost as model_grad
+
+
+#Util functions
+f_is_weekend = lambda date: 1 if date.weekday() in [5,6] else 0
+
+def f_tod(date): 
+    #time of the day
+    if date.hour in [6,7,8,9,10]: return "morning"
+    if date.hour in [11,12,13,14]: return "midday"
+    if date.hour in [15,16,17,18]: return "afternoon"
+    if date.hour in [19, 20, 21, 22, 23]: return "evening"
+    if date.hour in [0, 1, 2, 3, 4, 5]: return "night"
+
 
 class TripPredictor(object):
 
@@ -85,14 +101,32 @@ class TripPredictor(object):
         
         #Add additional features to train/test dataframe
         if len(df)>0:
-            df['weekday'] = df.apply(lambda row: row['pick_date'].weekday(), axis=1) 
-            df['is_weekend'] = df.apply(lambda row: 1 if row['weekday'] in [5,6] else 0, axis=1) 
-            df['is_morning'] = df.apply(lambda row: 1 if row['pick_date'].hour in [7,8,9,10] else 0, axis=1) 
-            df['is_midday'] = df.apply(lambda row: 1 if row['pick_date'].hour in [11,12,] else 0, axis=1) 
+
+            df = df.reset_index()
 
             df['hour'] = df.apply(lambda row: row['pick_date'].hour, axis=1)
+            df['min']  = df.apply(lambda row: row['pick_date'].hour * 60 + row['pick_date'].minute, axis=1)
+            df['weekend'] = df.apply(lambda row: f_is_weekend(row['pick_date']), axis=1) #binary feature
+            tod = df.apply(lambda row: f_tod(row['pick_date']), axis=1) #morning, midday, afternoon, envening, night
+            weekday = df.apply(lambda row: row['pick_date'].weekday(), axis=1)  #0-6
 
-    def _estDuration(self, dist, date):
+            #dummify categorical features (drop one dummy and append the rest to the resulting dataframe)
+            #append referent values to interim data to make sure all columns are present in the output (even if dataset does not
+            #contain all values in tod/weekday column)
+            ref_vals = ['morning', 'midday', 'afternoon', 'evening', 'night']
+            tod = pd.Series(list(itertools.chain(tod, ref_vals))) 
+            tod = pd.get_dummies(tod, prefix = 'tod')
+            df = df.join(tod.ix[:len(df), ['tod_'+i for i in ref_vals[1:]]])
+
+            ref_vals = range(0,7)
+            weekday = pd.Series(list(itertools.chain(weekday, ref_vals)))
+            weekday = pd.get_dummies(weekday, prefix = 'weekday')
+            df = df.join(weekday.ix[:len(df), ['weekday_'+str(i) for i in ref_vals[1:]]])
+
+        return df
+
+
+    def _est(self, dist, date, output_col):
 
         """
         Use the given data to train the model and return the predicted trip duration value for the requested input (dist, date).
@@ -103,22 +137,40 @@ class TripPredictor(object):
 
         #Compose the features
         if self.modelType in ["LIN", "FLWS", "BAG"]:
-            features = ['trip_distance']
-        elif self.modelType in ["FOREST", "GRAD"]:
-            features = ['trip_distance', 'weekday', 'hour']
+            features = ['trip_distance', 'min']
 
-        output = 'trip_time_in_secs'
+            #simple test dataset (all numerical features)
+            X_test = np.array([[dist, date.hour*60 + date.minute]])
+
+        elif self.modelType in ["FOREST", "GRAD"]:
+
+            #Separate categorical from numerical features
+            numerical_features = ['trip_distance', 'min', 'precip_f', 'weekend']
+            categorical_features =  ['tod_midday', 'tod_afternoon', 'tod_evening', 'tod_night', 'weekday_1', 'weekday_2', 'weekday_3', 'weekday_4', 'weekday_5', 'weekday_6']
+            features = list(itertools.chain(numerical_features, categorical_features))
+
+            #No Rain
+            precip = 0
+            df_test = pd.DataFrame([[date, dist, precip]], columns = ['pick_date', 'trip_distance', 'precip_f'])
+            df_test = self._addFeatures(df_test)
+            X_test = df_test[features].values
+            
 
         X_train = self.train_df[features].values
-        y_train = self.train_df[output].values
-
-        X_test = np.array([[dist, date.weekday(), date.hour]])
+        y_train = self.train_df[output_col].values
         y_test = [10] #Not in use
 
-        y_pred, _,_,_ = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 
-        est = round(y_pred[0]/60., 2) #convert to minutes
+        y_pred, _,_,fi = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 
 
-        return est
+        if fi: print "FEATURES: cnt", X_train.shape[1], " importance order", [features[i] for i in fi]
+        return y_pred[0]
+
+    def _estDuration(self, dist, date):
+
+        e = self._est(dist,date, output_col='trip_time_in_secs')
+        e = round(e/60., 2) #convert trip duration to minutes
+
+        return e
 
     def _estFare(self, dist, date):
               
@@ -126,24 +178,8 @@ class TripPredictor(object):
         Use the given data to train the model and return the predicted fare value for the requested input (dist, date).
         """
 
-        if not all(k in self.train_df.columns for k in ['pick_date', 'trip_distance', 'total_wo_tip']):
-            raise ValueError ("Input data frame is missing columns needed for construcing the model!")
-
-        #Compose the features
-        if self.modelType in ["LIN", "FLWS", "BAG"]:
-            features = ['trip_distance']
-        elif self.modelType in ["FOREST", "GRAD"]:
-            features = ['trip_distance', 'weekday', 'hour']
-
-        output = 'total_wo_tip'
-
-        X_train = self.train_df[features].values
-        y_train = self.train_df[output].values
-
-        X_test = np.array([[dist, date.weekday(), date.hour]])
-        y_test = [10] #Not in use 
-
-        y_pred, _,_, _ = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 
-        est = round(y_pred[0], 2)
+        est = self._est(dist,date, output_col='total_wo_tip')
+        est = round(est, 2)
 
         return est
+

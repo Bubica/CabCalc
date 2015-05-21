@@ -41,7 +41,7 @@ class TripPredictor(gp.TripPredictor):
         from 2013 for the  corresponding months.
         """
         t1 = time.time()
-        cols=['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_b'] #make sure columns match the ones defining search index in the database
+        cols=['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b'] #make sure columns match the ones defining search index in the database
         # cols = None
 
         td = (te - ts).days #interval in number of days
@@ -75,8 +75,11 @@ class TripPredictor(gp.TripPredictor):
         else:
             df = self.dbObj.query_Random(self.limit, date_span = (ts,te), cols=cols)
 
+        #Crude way of removing outliers
+        manip.filter_percentile(df, 'trip_distance', 95,5)
+
         #Add additional features
-        self._addFeatures(df)
+        df = self._addFeatures(df)
 
         return df
 

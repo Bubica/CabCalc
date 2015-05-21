@@ -160,9 +160,15 @@ def getCoordFromAddress(addrString, formattedAddress = False):
     #For given string addresses returns the lon/lat values
 
     url = ("https://maps.google.com/maps/api/geocode/json?address={0}&sensor=false&key={1}").format(addrString, googleApiKey)
+    print "GOOGLE addr resolution: ", url
+
     result= simplejson.load(urllib.urlopen(url))
 
     if 'results' not in result or len(result['results'])<=0:
+        if "error_message" in result:
+            print
+            print "ERROR:", result["error_message"]
+            print
         return None
         
     lat = result['results'][0]['geometry']["location"]['lat']
