@@ -187,7 +187,7 @@ class TripQ(Q):
     def count_Routes(self, s_point_lonlat, e_point_lonlat, env_sz):
         """
         Provides a count of routes accross all months.
-        NOTE: some c/p from query_Routes - TODO clean this up
+        NOTE: some c/p from query_Routes
         """
         s_point = geotools.sphericalConversion(*s_point_lonlat)
         e_point = geotools.sphericalConversion(*e_point_lonlat)
@@ -224,7 +224,7 @@ class TripQ(Q):
         neighbourhood of the end point.
         env_sz: size of the neighbouring area where to search for the points
         """
-        
+
         s_point = geotools.sphericalConversion(*s_point_lonlat)
         e_point = geotools.sphericalConversion(*e_point_lonlat)
 
@@ -296,11 +296,10 @@ class TripQ(Q):
                 #q = q +" AND " + qd
 
             if random: #SLOW! This is used when return random subset of routes from the db
-                q = q + "ORDER BY RAND()"
+                q = q + " ORDER BY RAND()"
 
             if limit is not None:
                 smpl = smpl_per_month[m]
-                print "LIMIT"
                 q = q +" LIMIT "+str(smpl)
         
             dfq, qt = self._fetchData(q)

@@ -19,7 +19,7 @@ def set_config_file(fname):
     print
     config.read(fname)
 
-def load_times():
+def load_dates():
 
     global config
 
@@ -37,7 +37,7 @@ def load_routes():
 
     return routes
 
-def load_locations(coord = True):
+def load_locations(coord = False):
 
     global config
     locations = [i for i in config.get('Geo','locations').split('\n') if len(i)>0] 
@@ -63,7 +63,6 @@ def load_test_setup():
     global config
 
     areas = json.loads(config.get('Test','area'))
-    sample_sets = json.loads(config.get('Test','samples'))
     t_intervals = json.loads(config.get('Test','t_interval'))
 
-    return areas, sample_sets, t_intervals
+    return areas, t_intervals

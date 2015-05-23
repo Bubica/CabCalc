@@ -1,22 +1,26 @@
 from collections import defaultdict
-from ..geo import google_loc as google_loc 
-from ..geo import tools as geotools
+import itertools
+import numpy as np
+from ...geo import google_loc as google_loc 
+from ...geo import tools as geotools
+from ...geo.graphhopper import graphhopper_proxy as graphhopper
 
-from ..trip_predict.predictor import generic_predictor as gp
-from ..trip_predict.predictor import location_aware
-from ..trip_predict.predictor import all_routes
+from ...trip_predict.predictor import generic_predictor as gp
+from ...trip_predict.predictor import location_aware
+from ...trip_predict.predictor import all_routes
 
-from ..predict.models import baggingRegress as model_bag
-from ..predict.models import linearRegress as model_lin
-from ..predict.models import feasibleWLS as model_fwls
-from ..predict.models import randomForest as model_forest
-from ..predict.models import gradientBoost as model_grad
+from ...trip_predict.models import baggingRegress as model_bag
+from ...trip_predict.models import linearRegress as model_lin
+from ...trip_predict.models import feasibleWLS as model_fwls
+from ...trip_predict.models import randomForest as model_forest
+from ...trip_predict.models import gradientBoost as model_grad
 
 class ValidationPredictor(gp.TripPredictor):
 
     """ 
     Tweaked verison on TripPredictor used for running validation tests.
     The instances of this class enable a single load of train data and running the validation on different models.
+
     """
 
     def __init__(self, predictor_module=location_aware):
@@ -53,7 +57,7 @@ class ValidationPredictor(gp.TripPredictor):
             self._setModel(model_grad, params)
 
     def _loadTrainData(self):
-        if not self.prevLoaded \
+        if self.prevLoaded is None \
             or self.prevLoaded['train_time_interval'] != self.expSetup['train_time_interval'] \
             or self.prevLoaded['train_area'] != self.expSetup['train_area'] \
             or self.prevLoaded['from_point'] != self.expSetup['from_point'] \
@@ -63,10 +67,17 @@ class ValidationPredictor(gp.TripPredictor):
 
             #Using past observations to infer trip durations of future trips
             tStart, tEnd  = self._timeInterval(self.expSetup['date'], self.expSetup['train_time_interval'], "end")
-            self.train_df = self.native_predictor._loadData(tStart, tEnd, self.expSetup['from_point'], self.expSetup['to_point'], self.expSetup['train_area'], self.expSetup['train_sample_cnt']) 
+            self.train_df = self.native_predictor._loadData(tStart, tEnd, self.expSetup['from_point'], \
+                self.expSetup['to_point'], self.expSetup['train_area'], self.expSetup['train_sample_cnt'],
+                cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b', \
+                'pick_x', 'pick_y', 'drop_x', 'drop_y']) 
+
+            print "TRAIN"
+            print self.train_df[['pick_date', 'precip_f']][225:]
+
 
     def _loadTestData(self):
-        if not self.prevLoaded \
+        if self.prevLoaded is None \
             or self.prevLoaded['test_time_interval'] != self.expSetup['test_time_interval'] \
             or self.prevLoaded['test_area'] != self.expSetup['test_area'] \
             or self.prevLoaded['from_point'] != self.expSetup['from_point'] \
@@ -76,16 +87,26 @@ class ValidationPredictor(gp.TripPredictor):
 
             #Using past observations to infer trip durations of future trips
             tStart, tEnd = self._timeInterval(self.expSetup['date'], self.expSetup['test_time_interval'], "start")
-            self.test_df = self.native_predictor._loadData(tStart, tEnd, self.expSetup['from_point'], self.expSetup['to_point'], self.expSetup['test_area'], self.expSetup['test_sample_cnt'])
+            self.test_df = self.native_predictor._loadData(tStart, tEnd, self.expSetup['from_point'], self.expSetup['to_point'], \
+                self.expSetup['test_area'], self.expSetup['test_sample_cnt'],
+                cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b', \
+                'pick_x', 'pick_y', 'drop_x', 'drop_y']) 
             self._shortest_route(self.test_df)
 
-    def _shortest_route(self, df):
+    def _shortest_route(self, df, server = 'graphhopper'):
         """
         Computes shortest route for each entry in the dataframe.
+        use either google service or local graphhopper.
         """
-        sp = google_loc.googleDistMatrixEst
+
         toLonLatPair = lambda px, py, dx, dy: (geotools.toLonLat(px, py), geotools.toLonLat(dx, dy)) #hack since double unpacking with asterisk does not work
-        df['shortest_route_dist'] = df.apply(lambda row: sp(*toLonLatPair(row['pick_x'], row['pick_y'], row['drop_x'], row['drop_y']))[0], axis = 1)
+
+        if server == 'google':
+            sp = lambda orig, dest: google_loc.getDistance(orig, dest, travel_time=False)
+        elif server == 'graphhopper':
+            sp = graphhopper.getDistance
+
+        df['shortest_route_dist'] = df.apply(lambda row: sp(*toLonLatPair(row['pick_x'], row['pick_y'], row['drop_x'], row['drop_y'])), axis = 1)
 
     def run(self):
 
@@ -121,7 +142,17 @@ class ValidationPredictor(gp.TripPredictor):
         y_test = self.test_df[output].values
 
         results = defaultdict()
+
+        
+        if np.isnan(np.sum(X_train)):
+            print features_train[2]
+            print X_train[:, 2]
+            print self.train_df['pick_date']
+
+
+
         _, results['rmse'], results['r2'], feat_priority = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 
-        results['fe'] = None if not feat_priority else ','.join([features[i] for i in feat_priority[:5]]) #store 5 most prominent features in a string
+
+        results['fe'] = None if feat_priority  is None else ','.join([features_train[i] for i in feat_priority[:5]]) #store 5 most prominent features in a string
 
         return results

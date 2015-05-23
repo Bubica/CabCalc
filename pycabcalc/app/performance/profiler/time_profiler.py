@@ -36,7 +36,7 @@ def db_select_only(log_fname):
     routes = config.load_routes()
     routes_coord = {r: (google_loc.getCoordFromAddress(r[0], True)[0], google_loc.getCoordFromAddress(r[1], True)[0]) for r in routes}
        
-    times = config.load_times()
+    dates = config.load_dates()
     areas, max_samples, t_intervals = config.load_train_setup()
 
     log_f = open(log_fname, "a")
@@ -56,7 +56,7 @@ def db_select_only(log_fname):
                     r0_lonlat = routes_coord[r][0] #google_loc.getCoordFromAddress(r[0], True)[0]
                     r1_lonlat = routes_coord[r][1] #google_loc.getCoordFromAddress(r[1], True)[0]
                     
-                    for t in times:
+                    for t in dates:
                         
                         print str(r[0])+sep+str(r[1])+sep+str(t)+sep+str(day_cnt)+sep+str(a)+sep+str(samp)+sep
 

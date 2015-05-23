@@ -15,12 +15,18 @@ def run(X_train, X_test, y_train, y_test, n_estimators=10, max_samples=10):
         X_train = np.array([X_train]).T
         X_test = np.array([X_test]).T
 
-    n_estimators = 5
     linregress =linear.LinearRegression
     logregress = linear.LogisticRegression
     rng = check_random_state(0) #random state object from np.random
 
-    ens = ensamble.BaggingRegressor(base_estimator=linregress(), random_state=rng, max_samples=max_samples, n_estimators=n_estimators).fit(X_train, y_train)
+    print
+    print "BAG"
+    print max_samples, type(max_samples)
+
+    # max_samples = np.float64(10)
+    # print max_samples, type(max_samples)
+    # return X_train, y_train, max_samples, n_estimators, None, None, None
+    ens = ensamble.BaggingRegressor(base_estimator=linregress(), random_state=rng, max_samples=int(max_samples), n_estimators=int(n_estimators)).fit(X_train, y_train)
 
     y_predicted = ens.predict(X_test)
 

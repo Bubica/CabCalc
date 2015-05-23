@@ -8,7 +8,7 @@ Proxy for composing routing requests to Graphhopper server running on http://loc
 
 Prior to executing methods from this module, start the server in the terminal with:
 
->>> cd /Users/bubica/Development/CODE/InsightDataScience2014/Project/resources/graphhopper
+>>> cd /Users/bubica/Development/CODE/PROJECTS/InsightDataScience2014/Project/resources/graphhopper
 >>> ./graphhopper.sh web north-america_us_new-york.pbf
 
 """

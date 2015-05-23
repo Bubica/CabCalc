@@ -31,7 +31,7 @@ class TripPredictor(gp.TripPredictor):
         tStart, tEnd = self._trainTimeInterval(date)
         self.train_df = self._loadData(tStart, tEnd, s_point, e_point, self.search_area, self.limit)
 
-    def _loadData(self, ts, te, s_point, e_point, env_sz, limit):
+    def _loadData(self, ts, te, s_point, e_point, env_sz, limit, cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b']):
 
         """
         Loads the train data from the database.
@@ -39,39 +39,48 @@ class TripPredictor(gp.TripPredictor):
         from 2013 for the  corresponding months.
         """
         t1 = time.time()
-        cols=['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b'] #make sure columns match the ones defining search index in the database
-        # cols = None
 
         td = (te - ts).days #interval in number of days
 
+        print
+        print "la LIMIT:", limit
+        print
         if ts.year < 2013:
             s1 = datetime.datetime(2013,1, 1, 0, 0, 0)
             e1 = te
-            cnt1 = None if self.limit is None else int(self.limit * (e1-s1).days/(1.*td))
-            df1 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s1, e1), limit=cnt1, cols=cols)
+            cnt1 = None if limit is None else int(limit * (e1-s1).days/(1.*td))
+            df1 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s1, e1), limit=cnt1, cols=cols, random=True)
 
             s2 = datetime.datetime(2013, ts.month, ts.day, ts.hour, ts.minute, ts.second)
             e2 = datetime.datetime(2013,12, 31, 23, 59, 59)
-            cnt2 = None if self.limit is None else self.limit - cnt1
-            df2 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s2, e2), limit=cnt2, cols=cols)
+            cnt2 = None if limit is None else limit - cnt1
+            df2 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s2, e2), limit=cnt2, cols=cols, random=True)
 
             df = pd.concat([df1, df2], axis = 0)
 
+            print
+            print "cnt1 LIMIT:", cnt1, cnt2
+            print
         elif te.year > 2013:
             s1 = ts
             e1 = datetime.datetime(2013,12, 31, 23, 59, 59)
-            cnt1 = None if self.limit is None else int(self.limit * (e1-s1).days/(1.*td))
-            df1 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s1, e1), limit=cnt1, cols=cols)
+            cnt1 = None if limit is None else int(limit * (e1-s1).days/(1.*td))
+            df1 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s1, e1), limit=cnt1, cols=cols, random=True)
 
             s2 = datetime.datetime(2013,1, 1, 0, 0, 0)
             e2 = datetime.datetime(2013, te.month, te.day, te.hour, te.minute, te.second)
-            cnt2 = None if self.limit is None else self.limit - cnt1
-            df2 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s2, e2), limit=cnt2, cols=cols)
+            cnt2 = None if limit is None else limit - cnt1
+            df2 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s2, e2), limit=cnt2, cols=cols, random=True)
 
             df = pd.concat([df1, df2], axis = 0)
-
+            print
+            print "cnt1 LIMIT:", cnt1, cnt2
+            print
         else:
-            df = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (ts,te), limit=limit, cols=cols)
+            print
+            print "cnt1 LIMIT: None at all"
+            print
+            df = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (ts,te), limit=limit, cols=cols, random=True)
 
         #Crude way of removing outliers
         df = manip.filter_percentile(df, 'trip_distance', 95,5)

@@ -25,7 +25,8 @@ def run(X_train, X_test, y_train, y_test, n_estimators=10,  max_depth=None):
     if n_estimators < 0:
         n_estimators = None
 
-    forest = ensemble.RandomForestRegressor(n_estimators=n_estimators, max_depth=max_depth, max_features=None, n_jobs=-1)
+    forest = ensemble.RandomForestRegressor(n_estimators=int(n_estimators), max_depth=max_depth, max_features=None, n_jobs=-1)
+
     forest.fit(X_train, y_train)
 
     y_predicted = forest.predict(X_test)

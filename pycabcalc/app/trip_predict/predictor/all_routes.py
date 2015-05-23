@@ -33,7 +33,7 @@ class TripPredictor(gp.TripPredictor):
         tStart, tEnd = self._trainTimeInterval(date)
         self.train_df = self._loadData(tStart, tEnd, self.limit)
 
-    def _loadData(self, ts, te, limit):
+    def _loadData(self, ts, te, limit, cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b']):
 
         """
         Loads the train data from the database.
@@ -41,8 +41,6 @@ class TripPredictor(gp.TripPredictor):
         from 2013 for the  corresponding months.
         """
         t1 = time.time()
-        cols=['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b'] #make sure columns match the ones defining search index in the database
-        # cols = None
 
         td = (te - ts).days #interval in number of days
 

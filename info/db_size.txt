@@ -1,0 +1,33 @@
+
+FULL = 9869.0 MB
+
+/* 
+DESCRIPTION:
+
+All data loaded. Each trip table has the following columns:
++-------------------+-------------+------+-----+---------+-------+
+| Field             | Type        | Null | Key | Default | Extra |
++-------------------+-------------+------+-----+---------+-------+
+| pick_date         | datetime    | NO   |     | NULL    |       |
+| trip_time_in_secs | smallint(6) | NO   |     | NULL    |       |
+| trip_distance     | float       | NO   |     | NULL    |       |
+| pick_x            | float       | NO   | MUL | NULL    |       |
+| pick_y            | float       | NO   |     | NULL    |       |
+| drop_x            | float       | NO   |     | NULL    |       |
+| drop_y            | float       | NO   |     | NULL    |       |
+| err_flag          | tinyint(1)  | NO   |     | 0       |       |
+| total_wo_tip      | float       | NO   |     | NULL    |       |
+| pick_lon          | double      | NO   |     | NULL    |       |
+| pick_lat          | double      | NO   |     | NULL    |       |
+| drop_lon          | double      | NO   |     | NULL    |       |
+| drop_lat          | double      | NO   |     | NULL    |       |
+| ord_no            | int(11)     | NO   | PRI | 0       |       |
+| precip_f          | float       | YES  |     | NULL    |       |
+| precip_b          | tinyint(1)  | YES  |     | NULL    |       |
+| manhattan         | tinyint(1)  | YES  |     | NULL    |       |
++-------------------+-------------+------+-----+---------+-------+
+
+Each trip table contains the index "ind_combo(pick_x, pick_y, drop_x, drop_y, pick_date)".
+*/
+
+

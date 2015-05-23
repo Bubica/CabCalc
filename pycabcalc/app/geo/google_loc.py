@@ -17,23 +17,29 @@ config.read(os.path.dirname(__file__)+"/"+"key.ini")
 googleApiKey = config.get('Google', 'key')
 
 
-def getDistance(orig, dest, travel_mode="driving"):
+def getDistance(orig, dest, travel_mode="driving", travel_time = True):
     """
     Given the starting and ending location provided in coordinates or string format, 
     return the distance (in miles) and travel time between these two points
     travel_mode: walking or driving
+    travel_time: if true, method will return travel time as well
     """
 
     if (type(orig) == str and type(dest) ==str) or (type(orig) == unicode and type(dest) == unicode):
-        return _distFromText (orig, dest, travel_mode)
+        d,t = _distFromText (orig, dest, travel_mode)
 
     elif type(orig) == tuple and type(dest) ==tuple:
-        return _distFromCoord (orig, dest, travel_mode)
+        d,t = _distFromCoord (orig, dest, travel_mode)
 
     else:
         print type(orig), type(dest)
         raise ValueError ("Malformed input!")
 
+    if travel_time:
+        return d,t
+    else:
+        return d
+        
 def _distFromCoord(orig_coord = (-73.990602, 40.731779), dest_coord =  (-73.976709, 40.731779), travel_mode="driving"):
 
     print "Fetching distance info using Google service... (coord input) "

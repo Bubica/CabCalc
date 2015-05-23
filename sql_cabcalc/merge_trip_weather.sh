@@ -5,7 +5,7 @@
 #Load the basic setup
 source db_setup.sh
 
-for TRIP_ID in `seq 11 12`;
+for TRIP_ID in `seq 10 10`;
 do
 	TRIP_TABLE="trip_"$TRIP_ID
 

@@ -80,7 +80,7 @@ def get_est(str_start_p, str_end_p, t, date, walk_est = True):
 
     #Create predictor obj - todo place the setup in config file
     #30 days lookup
-    predict_obj = TripPredictor(interval_sz=30)
+    predict_obj = TripPredictor(interval_sz=30, model = model_grad)
     predict_obj.search_area = 0.3 #size of the geographic search area
 
     #Get estimates

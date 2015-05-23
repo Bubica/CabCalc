@@ -71,13 +71,14 @@ class Logger(object):
         s += str(self.exp_setup["from"]) + "|"
         s += str(self.exp_setup["to"]) + "|"
         s += str(self.exp_setup["date"]) + "|"
-        s += str(self.exp_setup["trainInt"]) + "|"
-        s += str(self.exp_setup["testInt"]) + "|"
-        s += str(self.exp_setup["trainSmpl"]) + "|"
-        s += str(self.exp_setup["testSmpl"]) + "|"
-        s += str(self.exp_setup["trainArea"]) + "|"
-        s += str(self.exp_setup["testArea"]) + "|"
-        s += str(self.exp_setup["estTyp"]) + "|"
+        s += str(self.exp_setup["train_time_interval"]) + "|"
+        s += str(self.exp_setup["test_time_interval"]) + "|"
+        s += str(self.exp_setup["train_sample_cnt"]) + "|"
+        s += str(self.exp_setup["test_sample_cnt"]) + "|"
+        s += str(self.exp_setup["train_area"]) + "|"
+        s += str(self.exp_setup["test_area"]) + "|"
+        s += str(self.exp_setup["estimator"]) + "|"
+
 
         return s
 
