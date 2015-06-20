@@ -11,31 +11,46 @@ from ...trip_predict.predictor import location_aware
 from ...trip_predict.predictor import all_routes
 
 #Basic config stored in default.ini file
-config_fname = os.path.dirname(__file__)+"/"+"default.ini"
-config.set_config_file(config_fname)
+
 
 class Validator(object):
     
-    """ Main class for running the validation """
+    """ 
+    The main class for running a comprehensive validation procedure.
+    A separate validation is preformed across the grid of parameter data and the result of each such 
+    validation is stored in the output file.
+    """
 
     def __init__(self, output_folder, predictor_module=location_aware):
 
         self.predictor = ValidationPredictor(predictor_module)
+        self.predictor_module = predictor_module
+        io_pref = predictor_module.__name__.split('.')[-1] #prefix for io files
+
+        config_fname = os.path.dirname(__file__)+"/"+io_pref+"_config.ini"
+        config.set_config_file(config_fname)
+
+        print "Config file:", config_fname
 
         output_folder = output_folder if output_folder[-1]=='/' else output_folder+"/"
-        output_fname = 'validation_results_' + predictor_module.__name__.split('.')[-1]+'.csv'
+        output_fname = 'validation_results_' + io_pref +'.csv'
         self.logger = log.Logger(output_folder + output_fname) 
 
     def run(self):
 
-        expSetups = loadExpSetups()
-        modelSetups = loadModelSetups()
+        #Experimental setups incude varying number of sampes in the train/test dataset, geo area where the data is sampled from etc.
+        #Model setups pertain to specific parameters of the chosen predicot module (learning rate, number of 
+        #estimators in the composite predictors etc.)
+
+        expSetups = loadExpSetups(self.predictor_module)
+        modelSetups = loadModelSetups(self.predictor_module)
+
+        self.logger.log_header()
 
         for is_ in range(len(expSetups)):
 
             #Update experimental setup - single data load for each model setup
             eSetup = expSetups.loc[is_]
-            self.predictor.updateExpSetup(eSetup)
 
             print "Running experimental setup ", is_
 
@@ -45,35 +60,30 @@ class Validator(object):
 
                 print "        Running  model setup "
                 print mSetup
-                print eSetup.test_sample_cnt, eSetup.train_sample_cnt
 
                 #If previously logged - skip
                 self.logger.set_setup(eSetup, mSetup)
-                # if self.logger.check_setup_logged():
-                #     print "SKIPPED"
-                #     continue
+                if self.logger.check_setup_logged():
+                    print "SKIPPED"
+                    continue
 
+                self.predictor.updateExpSetup(eSetup)
                 self.predictor.updateModelSetup(mSetup) #Update model setup
                 results = self.predictor.run() #Train the model and store results
-
-                # if mSetup['type'] == "BAG":
-                #     print "Grid", results == None
-                #     return results
 
                 #LOG results
                 self.logger.set_results(results)
                 self.logger.log() #push to file
 
 
-def loadExpSetups():
+def loadExpSetups(predictor_module):
     """
     Load all possible combinations of the experimental setups.
     These setups are applicable to all tested models.
     """   
     print "Loading experiment setups.... ",
 
-    #Load data from default.ini config file
-    locations = config.load_locations()
+    #Load data from default.ini config file - config file contains different experimental setups for training on the subset of data
     routes = config.load_routes()
     dates = config.load_dates()
     train_area, train_sample_cnt, train_time_interval = config.load_train_setup()
@@ -82,13 +92,17 @@ def loadExpSetups():
 
     #create experiment setup dataframe
     expSetups = pd.DataFrame(columns = ['route', 'date', 'train_time_interval', 'test_time_interval', 'train_sample_cnt', 'train_area', 'test_area', 'estimator'])
+    if predictor_module == location_aware:
+        for i, val in enumerate(itertools.product(routes, dates, train_time_interval, test_time_interval, train_sample_cnt, train_area, test_area, estimator)):
+            expSetups.loc[i] = list(val)
+        
 
-    # return dates, routes, train_time_interval, test_time_interval, train_sample_cnt, train_area, test_area
 
-    for i, val in enumerate(itertools.product(routes, dates, train_time_interval, test_time_interval, train_sample_cnt, train_area, test_area, estimator)):
-        expSetups.loc[i] = list(val)
-    
-
+    elif predictor_module == all_routes:
+        for i, val in enumerate(itertools.product(routes, dates, train_time_interval, test_time_interval, train_sample_cnt, [None], test_area, estimator)):
+            expSetups.loc[i] = list(val)
+        
+    #Compute the size of test samples
     expSetups['test_sample_cnt'] = expSetups.train_sample_cnt.map(lambda train: int(3./7. * train)) #30/70 test/train ratio
     
     #Unpack route info
@@ -106,7 +120,7 @@ def loadExpSetups():
     return expSetups
 
 
-def loadModelSetups():
+def loadModelSetups(predictor_module):
     """ 
     Load all different model parameters used in validation
     """
@@ -158,5 +172,5 @@ def _modelParams():
 
 
 def main():
-    validator = Validator("/Users/bubica/Development/CODE/PROJECTS/InsightDataScience2014/Project/code/info/validation_results/", location_aware)
+    validator = Validator("/Users/bubica/Development/CODE/PROJECTS/InsightDataScience2014/Project/code/info/validation_results/", all_routes)
     return validator.run()

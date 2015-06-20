@@ -20,12 +20,13 @@ class ValidationPredictor(gp.TripPredictor):
     """ 
     Tweaked verison on TripPredictor used for running validation tests.
     The instances of this class enable a single load of train data and running the validation on different models.
-
     """
 
     def __init__(self, predictor_module=location_aware):
 
-        self.native_predictor = predictor_module.TripPredictor() #native load data used
+        #Loading train data will weither be location aware or not. Test data will always be location aware.
+        self.train_data_loader = predictor_module.TripPredictor() 
+        self.test_data_loader = location_aware.TripPredictor() 
 
         #stores info about previously loaded data to avoid reloading the same dataset
         self.prevLoaded = None
@@ -60,20 +61,31 @@ class ValidationPredictor(gp.TripPredictor):
         if self.prevLoaded is None \
             or self.prevLoaded['train_time_interval'] != self.expSetup['train_time_interval'] \
             or self.prevLoaded['train_area'] != self.expSetup['train_area'] \
-            or self.prevLoaded['from_point'] != self.expSetup['from_point'] \
-            or self.prevLoaded['to_point'] != self.expSetup['to_point'] \
             or self.prevLoaded['date'] != self.expSetup['date'] \
-            or self.prevLoaded['train_sample_cnt'] != self.expSetup['train_sample_cnt']:
+            or self.prevLoaded['train_sample_cnt'] != self.expSetup['train_sample_cnt'] \
+            or (self.train_data_loader == location_aware and \
+                (self.prevLoaded['from_point'] != self.expSetup['from_point'] \
+                    or self.prevLoaded['to_point'] != self.expSetup['to_point'])):
+
+            print
+            print
+            print "LOADING NEW TRAIN DATA!!!"
+            print
+            print
 
             #Using past observations to infer trip durations of future trips
             tStart, tEnd  = self._timeInterval(self.expSetup['date'], self.expSetup['train_time_interval'], "end")
-            self.train_df = self.native_predictor._loadData(tStart, tEnd, self.expSetup['from_point'], \
-                self.expSetup['to_point'], self.expSetup['train_area'], self.expSetup['train_sample_cnt'],
-                cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b', \
-                'pick_x', 'pick_y', 'drop_x', 'drop_y']) 
 
-            print "TRAIN"
-            print self.train_df[['pick_date', 'precip_f']][225:]
+            #Columns to be returned from the db
+            cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b', 'pick_x', 'pick_y', 'drop_x', 'drop_y']
+
+            if self.train_data_loader.__class__ == location_aware.TripPredictor:
+                self.train_df = self.train_data_loader._loadData(tStart, tEnd, self.expSetup['from_point'], \
+                    self.expSetup['to_point'], self.expSetup['train_area'], self.expSetup['train_sample_cnt'], cols = cols) 
+            elif self.train_data_loader.__class__ == all_routes.TripPredictor:
+               self.train_df = self.train_data_loader._loadData(tStart, tEnd, self.expSetup['train_sample_cnt'], cols = cols)
+            else:
+                raise ValueError
 
 
     def _loadTestData(self):
@@ -87,10 +99,10 @@ class ValidationPredictor(gp.TripPredictor):
 
             #Using past observations to infer trip durations of future trips
             tStart, tEnd = self._timeInterval(self.expSetup['date'], self.expSetup['test_time_interval'], "start")
-            self.test_df = self.native_predictor._loadData(tStart, tEnd, self.expSetup['from_point'], self.expSetup['to_point'], \
-                self.expSetup['test_area'], self.expSetup['test_sample_cnt'],
-                cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b', \
-                'pick_x', 'pick_y', 'drop_x', 'drop_y']) 
+
+            cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b', 'pick_x', 'pick_y', 'drop_x', 'drop_y']
+            self.test_df = self.test_data_loader._loadData(tStart, tEnd, self.expSetup['from_point'], self.expSetup['to_point'], self.expSetup['test_area'], self.expSetup['test_sample_cnt'], cols = cols) 
+
             self._shortest_route(self.test_df)
 
     def _shortest_route(self, df, server = 'graphhopper'):
@@ -142,13 +154,6 @@ class ValidationPredictor(gp.TripPredictor):
         y_test = self.test_df[output].values
 
         results = defaultdict()
-
-        
-        if np.isnan(np.sum(X_train)):
-            print features_train[2]
-            print X_train[:, 2]
-            print self.train_df['pick_date']
-
 
 
         _, results['rmse'], results['r2'], feat_priority = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 

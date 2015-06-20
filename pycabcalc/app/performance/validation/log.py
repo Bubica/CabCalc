@@ -1,10 +1,10 @@
-
+import numpy as np
 class Logger(object):
     
     """
     A singleton instance.
     Class used for logging the validation results in the log file.
-    Responsible for preserving the file format.
+    Responsible for maintaining the correct file format.
     """
 
     fname = None
@@ -29,16 +29,6 @@ class Logger(object):
         self.fname = fname
         self.f = open(self.fname, "a")
         self._reset()
-
-    # def _set_exp_setup(self, setup):
-    #     self.exp_setup = setup
-    #     self.model_setup = None
-    #     self.results = None
-
-    # def _set_model_setup(self, setup):
-    #     """ Resets only parameters that are related to the model, not the route and experimental setup """
-    #     self.model_setup = setup
-    #     self.results = None
     
     def set_setup(self, expSetup, modelSetup):
         self.exp_setup = expSetup
@@ -52,7 +42,10 @@ class Logger(object):
         
         """ Checks if the setup has been already logged """
 
-        line = self._setup_log_line()+self._model_log_line()
+        line = ""
+        line += self._setup_log_line()
+        line += self._model_log_line()
+
         ff = open(self.fname, 'r')
         s = ff.read()
         ff.close()
@@ -67,6 +60,8 @@ class Logger(object):
 
         """ Logs basic setup data and model type """
 
+        is_set = lambda x: x is not None and not np.isnan(x)
+
         s = ""
         s += str(self.exp_setup["from"]) + "|"
         s += str(self.exp_setup["to"]) + "|"
@@ -75,8 +70,8 @@ class Logger(object):
         s += str(self.exp_setup["test_time_interval"]) + "|"
         s += str(self.exp_setup["train_sample_cnt"]) + "|"
         s += str(self.exp_setup["test_sample_cnt"]) + "|"
-        s += str(self.exp_setup["train_area"]) + "|"
-        s += str(self.exp_setup["test_area"]) + "|"
+        s += str(self.exp_setup["train_area"]) + "|" if is_set(self.exp_setup["train_area"]) else "|"
+        s += str(self.exp_setup["test_area"]) + "|"  if is_set(self.exp_setup["test_area"]) else "|"
         s += str(self.exp_setup["estimator"]) + "|"
 
 
@@ -86,15 +81,17 @@ class Logger(object):
 
         """ Logs model parameters """
 
+        is_set = lambda x: x is not None and not np.isnan(x)
+
         s = ""
         s += str(self.model_setup["type"]) + "|"
-        if "n_estimators" in s: s += str(self.model_setup["n_estimators"]) 
+        if is_set(self.model_setup["n_estimators"]) : s += str(self.model_setup["n_estimators"]) 
         s+=  "|"
-        if "learn_rate" in s: s += str(self.model_setup["learn_rate"])
+        if is_set(self.model_setup["learn_rate"]) : s += str(self.model_setup["learn_rate"])
         s+=  "|"
-        if "max_samples" in s: s += str(self.model_setup["max_samples"])
+        if is_set(self.model_setup["max_samples"]) : s += str(self.model_setup["max_samples"])
         s+=  "|"
-        if "max_depth" in s: s += str(self.model_setup["max_depth"])
+        if is_set(self.model_setup["max_depth" ]) : s += str(self.model_setup["max_depth"])
         s+=  "|"
 
         return s
@@ -109,6 +106,32 @@ class Logger(object):
         s += str(self.results["fe"])
 
         return s
+
+    def log_header(self):
+
+        s = ""
+        s += "from" + "|"
+        s += "to" + "|"
+        s += "date" + "|"
+        s += "train_time_interval" + "|"
+        s += "test_time_interval" + "|"
+        s += "train_sample_cnt" + "|"
+        s += "test_sample_cnt" + "|"
+        s += "train_area"+ "|"
+        s += "test_area" + "|"
+        s += "estimator" + "|"
+        s += "model_type" + "|"
+        s += "model_n_estimators" +"|"
+        s += "model_learn_rate" + "|"
+        s += "model_max_samples" + "|"
+        s += "model_max_depth" + "|"
+        s += "rmse" + "|"
+        s += "r2" + "|"
+        s += "fe"
+        s += "\n"
+        
+        self.f.write(s)
+        self.f.flush()
 
     def log_comment(self, comment):
         """ Logs comments (in a separate line) prefixed with # character """

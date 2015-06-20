@@ -44,7 +44,6 @@ def db_select_only(log_fname):
 
     tp = TripPredictor()
     
-
     print 
     print "Config file:", config_fname, areas
 
@@ -53,8 +52,8 @@ def db_select_only(log_fname):
             for samp in max_samples:
                 for r in routes:
                     
-                    r0_lonlat = routes_coord[r][0] #google_loc.getCoordFromAddress(r[0], True)[0]
-                    r1_lonlat = routes_coord[r][1] #google_loc.getCoordFromAddress(r[1], True)[0]
+                    r0_lonlat = routes_coord[r][0] 
+                    r1_lonlat = routes_coord[r][1] 
                     
                     for t in dates:
                         
