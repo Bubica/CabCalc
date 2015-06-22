@@ -1,11 +1,15 @@
 #!/bin/bash
 
+#Dump/Load taxi database into/from local text file - backup purpose
+
 #Load the basic setup
 source db_setup.sh
 
 if [ $1 = "store" ];
 then 
 	echo "Storing the database into txt files"
+	#csv files located in /usr/local/mysql/data/taxi
+	
 	for i in {1..12}
 	do
 		echo "Dumping month $i" 
