@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as pp
-
+from scipy.stats import mode
 
 def load(fname):
 
@@ -91,8 +91,13 @@ def _multiple_hist_plot(df, feature, ax = None):
     ax.set_xticklabels([round(i,2) for i in h_bins])
     ax.legend(loc=2, prop={'size':10})
 
+##############################################################################################################################
 
 def print_opt():
+
+    """ 
+    Print the optimal setup for both all routes and local routes approach.
+    """
 
     #Load the validation results
     all_fn='info/validation_results/validation_results_all_routes.csv'
@@ -101,12 +106,89 @@ def print_opt():
     df_loc = load(loc_fn)
     df_all = load(all_fn)
 
-    print "Local"
-    print opt_setup(df_loc, 5, plot = True)
+    """ LOCAL 
+    
+    Observations:
+    The best model selected for local route approach is GRAD (4 out of 5 in top 5).
+    It consistently outlines minutes since midnight (18 out of 18 routes), trip distance (18 out of 18) and weekend binary feature (11-15 out of 18) as the most important ones.
+    In top 5 models, FOREST model has been found to be one of top 5 (4th).
+    In case of FOREST, the most prominent features are categorical tod_night, tod_evening and tod_afternoon, although not as consistently
+    as in the case of GRAD (i.e. less number of routes outline the same features in this priority order as in the case of GRAD).
 
-    print "All"
-    print opt_setup(df_all, 5, plot = True)
+    We can conclude that time of day when the trip is taking place is more important than the other features.
+    Trip distance becomes less important in this approach since the optimal selected train area is the smallest one (0.3 miles) and
+    the distance in trips will not differ significantly amongst train routes.
 
+    In the case of routes where enough data is supplied in the database for all tested setups (i.e. most frequent pickup/dropoff hubs)
+    the optimum setup favours greater number of samples (i.e. 5000) collected accross the shortest amount of time (30 day interval) to build
+    a model. Routes are sampled from the smallest area selected (0.3 miles).
+
+    In case when not enough data is available in the dataset (e.g. in case when Columbia University was selected as a hub as pickup point)
+    optimum setup favours area of greater size (0.8 miles) and the shortest time inertval (30 days) over the area of smaller size and longer time interval.
+    For this reason, final app will be increasing the size of the area until enough train samples have been found.
+    """
+    top_5 = opt_setup(df_loc, 5, plot = True)
+    print "Local: top 5 setups"
+    print
+
+    for i in range(0,5):
+
+        #print setup details
+        print "Setup ", i+1
+        print top_5[['train_time_interval', 'train_sample_cnt', 'train_area', 'model_type', 'model_n_estimators', 'model_learn_rate',  'model_max_samples',  'model_max_depth', 'r2']].iloc[i]
+        print "------------------------------------"
+        print
+
+        #print most important features
+        opt_routes = df_loc.merge(top_5[i:i+1].drop('r2', axis = 1), how = 'inner') #for each route, time select results pertaining to current setup
+        feature_importance = opt_routes['fe'].str.split(',').apply(pd.Series, 1) #feature importance dataframe (each i-th column contains a feature of i-th importance for a particular route)
+        top_features = feature_importance.apply(mode).apply(pd.Series,1)
+
+        print "Top features (feature : count)"
+        print top_features
+        print
+        print "************************************************************"
+        print
+
+
+    print; print; print
+
+    """ ALL 
+
+    Observations:
+    The best model selected for all routes approach is again GRAD (5 out of 5 in top 5).
+    It consistently trip distance (18 out of 18) as the most prominent feature and  minutes since midnight (18 out of 18 routes) as the 
+    second most important one.
+    The third most prominent feature is either weekend or precipitation.
+    It is expected that the trip distance will govern the output of this approach the most.
+    However due to low R2 scores (< 0.1 for the top model) this approach clearly falls behind the local route one.
+
+    """
+    top_5 = opt_setup(df_all, 5, plot = True)
+    print "All: top 5 setups"
+    print
+
+    for i in range(0,5):
+
+        #print setup details
+        print "Setup ", i+1
+        print top_5[['train_time_interval', 'train_sample_cnt', 'train_area', 'model_type', 'model_n_estimators', 'model_learn_rate',  'model_max_samples',  'model_max_depth', 'r2']].iloc[i]
+        print "------------------------------------"
+        print
+
+        #print most important features
+        opt_routes = df_all.merge(top_5[i:i+1].drop('r2', axis = 1), how = 'inner') #for each route, time select results pertaining to current setup
+        feature_importance = opt_routes['fe'].str.split(',').apply(pd.Series, 1) #feature importance dataframe (each i-th column contains a feature of i-th importance for a particular route)
+        top_features = feature_importance.apply(mode).apply(pd.Series,1)
+
+        print "Top features (feature : count)"
+        print top_features
+        print
+        print "************************************************************"
+        print
+
+
+    print; print; print
 
 def local_vs_all(plot = True):
     """ 
