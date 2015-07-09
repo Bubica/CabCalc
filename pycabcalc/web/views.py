@@ -1,14 +1,14 @@
 from flask import render_template, flash, redirect, jsonify, request, make_response
 from flask import Response
-from web import flask_app as app
+# from web import flask_app as app
+from . import flask_app as app
 import math
 import calendar
 import pandas as pd
 import json
 
+from ..app.trends.hub import traffic
 import web_trip_predictor as predictor
-from app.trends.hub import traffic
-
 
 
 @app.route('/')
@@ -164,13 +164,20 @@ def est():
     if errMsg is None:
 
         #Return the result
-        time_est = int(round(est[0], 0))
-        walk_est = est[2]
-        fare_est = est[1]
-        origin_addr = est[3]
-        dest_addr = est[4]
+        durEst_norain = int(round(est[0], 0))
+        fareEst_norain = est[1]
+        durEst_rain = int(round(est[2], 0))
+        fareEst_rain = est[3]
+        walk_est = est[4]
+        origin_addr = est[5]
+        dest_addr = est[6]
 
-        return render_template('Taxi_Est.html', dur_est = str(time_est), walk_est=str(walk_est), fare_est=str(fare_est), origin_addr = origin_addr, dest_addr = dest_addr, err_msg = "")
+        if durEst_norain - durEst_rain != 0:
+            return render_template('Taxi_Est.html', dur_est_norain = str(durEst_norain), dur_est_rain = str(durEst_rain), walk_est=str(walk_est), fare_est_norain=str(fareEst_norain), fare_est_rain=str(fareEst_rain), origin_addr = origin_addr, dest_addr = dest_addr, err_msg = "")
+        else:
+            #display single result
+            return render_template('Taxi_Est.html', dur_est_norain = str(durEst_norain), dur_est_rain = "None", walk_est=str(walk_est), fare_est_norain=str(fareEst_norain), fare_est_rain="None", origin_addr = origin_addr, dest_addr = dest_addr, err_msg = "")
+
     else: 
         return render_template('Taxi_Intro.html', err_msg = str(est[-1]))
 

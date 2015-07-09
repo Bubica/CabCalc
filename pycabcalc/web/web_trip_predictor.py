@@ -4,8 +4,10 @@ import datetime
 import time
 import calendar
 
-from app.trip_predict.predictor.location_aware import TripPredictor
-from app.geo import google_loc
+from ..app.trip_predict.predictor.location_aware import TripPredictor
+from ..app.trip_predict.predictor.location_aware import InsufficientDataError
+from ..app.trip_predict.models import gradientBoost as model_grad
+from ..app.geo import google_loc
 
 """
 Module for running main predictor selected for the web app.
@@ -78,20 +80,46 @@ def get_est(str_start_p, str_end_p, t, date, walk_est = True):
     if not t_datetime:
         return ("","","","","","Malformed time/date. Required format: YYYY-MM-DD, HH:MM")
 
-    #Create predictor obj - todo place the setup in config file
-    #30 days lookup
-    predict_obj = TripPredictor(interval_sz=30, model = model_grad)
-    predict_obj.search_area = 0.3 #size of the geographic search area
+    if 'airport' in start_add_formatted.lower() or 'airport' in end_add_formatted.lower():
+        search_area = 1.
+    else:
+        search_area = 0.3
 
-    #Get estimates
-    est_dur, est_fare, _ = predict_obj.getEstimates(start_p, end_p, t_datetime)
+    done_flag = False
+    while search_area < 5 and not done_flag:
+        try:
+            #Create predictor obj - todo place the setup in config file
+            predict_obj = TripPredictor(interval_sz=60, limit = 5000, model = model_grad, search_area=search_area, modelParams={"n_estimators": 50, "learn_rate":0.1, "max_depth":3})
+
+            #Get estimates
+            durEst_norain, fareEst_norain, durEst_rain, fareEst_rain, _ = predict_obj.getEstimates(start_p, end_p, t_datetime)
+
+            done_flag = True
+
+        except InsufficientDataError:
+            #No enough data available to build a model - increase the search area (by 2.5 factor) and repeat
+            print 
+            print "Increasing the search size to ", search_area * 2.5
+            print
+            search_area *= 2.5
+            
+
+    if not done_flag:
+        return ("","","","","","Sorry, not enough data to predict this route :(.")
 
     #get duration estimate of walk (for comparison)
-    if walk_est:
-        walk_dur = google_loc.getDistance(start_p, end_p, travel_mode="walking")[1]/60. #im mins
-        walk_dur = round(walk_dur,2)
-    else:
-        walk_dur = None
+    walk_dur = None
+    if walk_est:        
+        try:
+            walk_dur = google_loc.getDistance(start_p, end_p, travel_mode="walking")[1]/60. #im mins
+            walk_dur = round(walk_dur,2)
+        except:
+            #if the distance is too long to walk, google will return no results...
+            pass 
+
+    print 
+    print "RESULT", durEst_norain, fareEst_norain, durEst_rain, fareEst_rain
+    print
     
-    return est_dur, est_fare, walk_dur, start_add_formatted, end_add_formatted, None
+    return durEst_norain, fareEst_norain, durEst_rain, fareEst_rain, walk_dur, start_add_formatted, end_add_formatted, None
     

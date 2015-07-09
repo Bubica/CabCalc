@@ -18,6 +18,7 @@ from ..models import gradientBoost as model_grad
 class TripPredictor(gp.TripPredictor):
 
     search_area = 0.3 #area around start end point used for searching for train routes
+    min_train_sample_size = 100 #min number of samples needed to build a model
 
     def __init__(self, model = model_grad, modelParams=pd.Series([]), limit = None, search_area=None, interval_sz=None):
 
@@ -31,7 +32,7 @@ class TripPredictor(gp.TripPredictor):
         tStart, tEnd = self._trainTimeInterval(date)
         self.train_df = self._loadData(tStart, tEnd, s_point, e_point, self.search_area, self.limit)
 
-    def _loadData(self, ts, te, s_point, e_point, env_sz, limit, cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f', 'precip_b']):
+    def _loadData(self, ts, te, s_point, e_point, env_sz, limit, cols = ['pick_date', 'trip_distance', 'trip_time_in_secs', 'total_wo_tip', 'precip_f']):
 
         """
         Loads the train data from the database.
@@ -42,9 +43,6 @@ class TripPredictor(gp.TripPredictor):
 
         td = (te - ts).days #interval in number of days
 
-        print
-        print "la LIMIT:", limit
-        print
         if ts.year < 2013:
             s1 = datetime.datetime(2013,1, 1, 0, 0, 0)
             e1 = te
@@ -58,9 +56,6 @@ class TripPredictor(gp.TripPredictor):
 
             df = pd.concat([df1, df2], axis = 0)
 
-            print
-            print "cnt1 LIMIT:", cnt1, cnt2
-            print
         elif te.year > 2013:
             s1 = ts
             e1 = datetime.datetime(2013,12, 31, 23, 59, 59)
@@ -73,14 +68,13 @@ class TripPredictor(gp.TripPredictor):
             df2 = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (s2, e2), limit=cnt2, cols=cols, random=True)
 
             df = pd.concat([df1, df2], axis = 0)
-            print
-            print "cnt1 LIMIT:", cnt1, cnt2
-            print
+        
         else:
-            print
-            print "cnt1 LIMIT: None at all"
-            print
             df = self.dbObj.query_Routes(s_point, e_point, env_sz = env_sz, date_span = (ts,te), limit=limit, cols=cols, random=True)
+
+        if len(df) < self.min_train_sample_size:
+            #No records found - raise exeption
+            raise InsufficientDataError("No train data found.")
 
         #Crude way of removing outliers
         df = manip.filter_percentile(df, 'trip_distance', 95,5)
@@ -103,12 +97,22 @@ class TripPredictor(gp.TripPredictor):
         self._loadTrainData(date, s_point, e_point)
 
         dist = google_loc.getDistance(s_point, e_point)[0] #get an estimate of the distance between these two points
-        durEst = self._estDuration(dist, date)
-        fareEst = self._estFare (dist, date)
+        
+        durEst_norain = self._estDuration(dist, date, rain = False)
+        durEst_rain   = self._estDuration(dist, date, rain = True)
+        
+        fareEst_norain = self._estFare (dist, date, rain = False)
+        fareEst_rain   = self._estFare (dist, date, rain = True)
 
         te = time.time()
         t_delta = te - ts
 
-        return durEst, fareEst, t_delta
+        return durEst_norain, fareEst_norain, durEst_rain, fareEst_rain, t_delta
+
+
+class InsufficientDataError(Exception):
+
+    def __init__(self, message):
+        super(InsufficientDataError, self).__init__(message)
 
 

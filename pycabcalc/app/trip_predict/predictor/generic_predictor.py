@@ -126,7 +126,7 @@ class TripPredictor(object):
         return df
 
 
-    def _est(self, dist, date, output_col):
+    def _est(self, dist, date, output_col, rain = False):
 
         """
         Use the given data to train the model and return the predicted trip duration value for the requested input (dist, date).
@@ -149,8 +149,7 @@ class TripPredictor(object):
             categorical_features =  ['tod_midday', 'tod_afternoon', 'tod_evening', 'tod_night', 'weekday_1', 'weekday_2', 'weekday_3', 'weekday_4', 'weekday_5', 'weekday_6']
             features = list(itertools.chain(numerical_features, categorical_features))
 
-            #No Rain
-            precip = 0
+            precip = 0 if not rain else 1 #Rain float value
             df_test = pd.DataFrame([[date, dist, precip]], columns = ['pick_date', 'trip_distance', 'precip_f'])
             df_test = self._addFeatures(df_test)
             X_test = df_test[features].values
@@ -160,25 +159,26 @@ class TripPredictor(object):
         y_train = self.train_df[output_col].values
         y_test = [10] #Not in use
 
-        y_pred, _,_,fi = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 
+        y_pred, _,_, fi = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 
 
-        if fi: print "FEATURES: cnt", X_train.shape[1], " importance order", [features[i] for i in fi]
+        if fi is not None: 
+            print "FEATURES: cnt", X_train.shape[1], " importance order", [features[i] for i in fi]
         return y_pred[0]
 
-    def _estDuration(self, dist, date):
+    def _estDuration(self, dist, date, rain = False):
 
-        e = self._est(dist,date, output_col='trip_time_in_secs')
+        e = self._est(dist,date, output_col='trip_time_in_secs', rain = rain)
         e = round(e/60., 2) #convert trip duration to minutes
 
         return e
 
-    def _estFare(self, dist, date):
+    def _estFare(self, dist, date, rain = False):
               
         """
         Use the given data to train the model and return the predicted fare value for the requested input (dist, date).
         """
 
-        est = self._est(dist,date, output_col='total_wo_tip')
+        est = self._est(dist,date, output_col='total_wo_tip', rain = rain)
         est = round(est, 2)
 
         return est

@@ -125,17 +125,47 @@ p {
   font-weight: 100;
   text-align: center;
 }
-.texte-est {
+
+.est-container {
+  
+  display: block;
+  background:rgba(0, 0, 0, 0.6);
+  width: 45%;
+  margin:10px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #f7b731;
+  border-radius: 7px;
+  padding-left: 20px;
   padding-top: 20px;
-  padding-bottom: 0px;
+  padding-bottom: 20px;
   font-family:'Roboto Slab', sans-serif;
-  color: #f7b731;
-  font-size: 72px;
   line-height: 60px;
-  font-weight: 1000;
   text-align: center;
 }
 
+.est-text-value
+{
+    color: #f7b731;
+    font-size: 72px;
+    font-weight: 1000;
+}
+
+.est-text-fare
+{
+    color: #f7b731;
+    padding-top: 10px;
+    font-size: 34px;
+    font-weight: 100;
+}
+
+.est-text-weather
+{
+    color: #55acee;
+    padding-top: 30px;
+    font-size: 34px;
+    font-weight: 100;
+}
 
 .texte-data-story-q {
   padding-top: 30px;

@@ -155,9 +155,8 @@ class ValidationPredictor(gp.TripPredictor):
 
         results = defaultdict()
 
-
         _, results['rmse'], results['r2'], feat_priority = self.model.run(X_train, X_test, y_train, y_test, **self.modelParams) 
 
-        results['fe'] = None if feat_priority  is None else ','.join([features_train[i] for i in feat_priority[:5]]) #store 5 most prominent features in a string
+        results['fe'] = None if feat_priority is None else ','.join([features_train[i] for i in feat_priority[:5]]) #store 5 most prominent features in a string
 
         return results

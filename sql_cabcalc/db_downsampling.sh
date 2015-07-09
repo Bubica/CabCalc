@@ -6,9 +6,9 @@
 #Previous values of err column will be discarded.
 
 source db_setup.sh
-SAMPLE_PERC=0.5 #percentage of samples that will be kept in the database - random sampling
+SAMPLE_PERC=0.8 #percentage of samples that will be kept in the database - random sampling
 
-for i in {6..12}
+for i in {1..12}
 do
 	TABLE_NAME=$TABLE_PREFIX$i
 
@@ -28,23 +28,35 @@ do
 	mysql -e "$DB_SZ_COMMAND" -u root $DB_NAME
 
 	TABLE_NAME=$TABLE_PREFIX$i
-	SQL_CMD="UPDATE "$TABLE_NAME" SET err_flag=IF(RAND()<="$SAMPLE_PERC", 0, 1)"
+
+	#Create auxilliary columns
+	echo "Creating flag column..." 
+	SQL_CMD="ALTER TABLE "$TABLE_NAME" ADD COLUMN flag TINYINT"
+	mysql -e "$SQL_CMD" -u root  $DB_NAME
+
+	echo "Random selection (only non rainy records). Keeping rainy days..." 
+	SQL_CMD="UPDATE "$TABLE_NAME" SET flag=IF(RAND()<="$SAMPLE_PERC" OR precip_f>=0.5, 0, 1) "
 	mysql -e "$SQL_CMD" -u root  $DB_NAME
 
 	echo "Delete marked records..." 
-	SQL_CMD="DELETE FROM "$TABLE_NAME" WHERE err_flag=1"
+	SQL_CMD="DELETE FROM "$TABLE_NAME" WHERE flag=1"
+	mysql -e "$SQL_CMD" -u root  $DB_NAME
+
+	echo "Delete temp column..." 
+	SQL_CMD="ALTER TABLE "$TABLE_NAME" DROP COLUMN flag"
 	mysql -e "$SQL_CMD" -u root  $DB_NAME
 
 	echo "Cleanup..."
+
 	#Drop indices
-	./db_indexing.sh drop $TABLE_NAME
+	# ./db_indexing.sh drop $TABLE_NAME
 
-	echo "Reclaim free space"
-	SQL_CMD="OPTIMIZE TABLE "$TABLE_NAME
-	mysql -e "$SQL_CMD" -u root  $DB_NAME
+	# echo "Reclaim free space"
+	# SQL_CMD="OPTIMIZE TABLE "$TABLE_NAME
+	# mysql -e "$SQL_CMD" -u root  $DB_NAME
 
-	#Recreate indices
-	./db_indexing.sh create $TABLE_NAME
+	# #Recreate indices
+	# ./db_indexing.sh create $TABLE_NAME
 
 	echo "Size @ the end: "
 	mysql -e "$DB_SZ_COMMAND" -u root $DB_NAME

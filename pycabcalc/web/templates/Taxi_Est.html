@@ -25,12 +25,37 @@
     <div class="tagline"><b>{{origin_addr}}</b> to <b>{{dest_addr}}</b></div>
   </div>
   <div class="w-container">
-    <div class="texte-in-texte">Your journey will cost about ${{fare_est}} and take... </div>
-    <div class="texte-est" id="dur_est", name="dur_est">{{dur_est}} min</div>
+    <div class="texte-in-texte">Your journey will take about: </div>
+
+    <div style="padding-left: 20px; padding-right: 20px; padding-top:20px;">
+      {% if dur_est_rain != "None" %}
+      <div class="est-container" id="dur_est_norain", name="dur_est" style = "float: left;">
+      {% else %}
+      <div class="est-container" id="dur_est_norain", name="dur_est" style = "margin: 0 auto;">
+      {% endif %} 
+          <div class="est-text-value">{{dur_est_norain}} min</div>
+          <div class="est-text-fare" style="padding-top: 10px;">and cost cca. ${{fare_est_norain}} </div>
+          {% if dur_est_rain != "None" %}
+            <div class="est-text-weather">(No rain)</div>
+          {% endif %}
+      </div>
+      {% if dur_est_rain != "None" %}
+      <div class="est-container" id="dur_est_rain", name="dur_est" style = "float: right;">
+        <div class="est-text-value">{{dur_est_rain}} min</div>
+        <div class="est-text-fare" style="padding-top: 10px;">and cost cca. ${{fare_est_rain}} </div>
+        <div class="est-text-weather">(Rain)</div>
+      </div>
+      {% endif %}
+    </div>
   </div>
-  <div class="w-container" style="margin-top: 80px;">
-    <div class="texte-in-texte" style="color: #55acee;">(And if you decide to walk, it will take you {{walk_est}} min)  </div>
-  </div>
+
+  {% if walk_est != "None" %}
+    <div class="w-container" style="margin-top: 10px;">
+      <div class="texte-in-texte" style="color: #55acee; padding-top: 10px;">(And if you decide to walk, it will take you {{walk_est}} min)  </div>
+    </div>
+  {% endif %}
+
+
   
   <div class="w-container">
     <div class="footer"></div>

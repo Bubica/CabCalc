@@ -1,9 +1,10 @@
 *.pyc
 *.pbf
 
-.pem
+*.pem
 
 .DS_Store
 ipy_notebook_sandbox
 external_resources
 key.ini
+connect2aws.sh
