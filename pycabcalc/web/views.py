@@ -10,6 +10,10 @@ import json
 from ..app.trends.hub import traffic
 import web_trip_predictor as predictor
 
+import sys
+import os
+
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) #force automatic flush of stdout -- used for logging on the server
 
 @app.route('/')
 @app.route('/index')
